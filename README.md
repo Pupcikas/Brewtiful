@@ -38,5 +38,5 @@ Administratorius galės:
 
 Sistemos sudedamosios dalys:
 
-- Kliento pusė (ang. Front-End) – naudojant React.js, Tailwind;
+- Kliento pusė (angl. Front-End) – naudojant React.js, Tailwind;
 - Serverio pusė (angl. Back-End) – naudojant <span>ASP.NET</span> Core. Duomenų bazė – MongoDB.
