@@ -1,0 +1,4032 @@
+openapi: 3.0.3
+info:
+  title: Brewtiful API
+  version: 1.0.0
+servers:
+  - url: http://{{baseurl}}
+tags:
+  - name: Sample APIs
+  - name: api
+  - name: api/Hierarchija
+  - name: api/Category
+  - name: api/Item
+  - name: api/Ingredient
+  - name: api/Cart
+  - name: api/CartItem
+  - name: api/User
+paths:
+  /api/Category/FullHierarchy:
+    get:
+      summary: Get all categories
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get all categories
+                  value: "{\r\n    \"id\": {integer},\r\n    \"name\": \"{string}\"\r\n}\r\n{\r\n    \"id\": {integer},\r\n    \"name\": \"{string}\"\r\n}"
+          headers: {}
+      security: []
+  /api/Item/category/1:
+    get:
+      summary: Get by category ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Hierarchija
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  categoryId:
+                    type: string
+                  category:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                      - id
+                      - name
+                  ingredientNames:
+                    type: string
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        defaultQuantity:
+                          type: string
+                        extraCost:
+                          type: string
+                      required:
+                        - id
+                        - name
+                        - defaultQuantity
+                        - extraCost
+                  price:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - categoryId
+                  - category
+                  - ingredientNames
+                  - ingredients
+                  - price
+              examples:
+                '1':
+                  summary: Get items by category ID
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"categoryId\": \"integer\",\r\n    \"category\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\"\r\n    },\r\n    \"ingredientNames\": \"array<string>\",\r\n    \"ingredients\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        },\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        }\r\n    ],\r\n    \"price\": \"float\"\r\n}\r\n"
+          headers: {}
+      security: []
+  /:
+    get:
+      summary: Get by category and item ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Hierarchija
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get by category and item ID
+                  value: "[\r\n    {\r\n        \"id\": {integer},\r\n        \"name\": {string},\r\n        \"items\": [\r\n            {\r\n                \"id\": {integer},\r\n                \"name\": {string},\r\n                \"categoryId\": {integer},\r\n                \"category\": {string},\r\n                \"ingredientNames\": [{string}],\r\n                \"ingredients\": [\r\n                    {\r\n                        \"id\": {integer},\r\n                        \"name\": {string},\r\n                        \"defaultQuantity\": {integer},\r\n                        \"extraCost\": {integer},\r\n                        \"itemIds\": [{int}]\r\n                    },\r\n                    {\r\n                        \"id\": {int},\r\n                        \"name\": {integer},\r\n                        \"defaultQuantity\": {integer},\r\n                        \"extraCost\": {integer},\r\n                        \"itemIds\": [{integer}]\r\n                    }\r\n                ],\r\n                \"price\": {double}\r\n            }\r\n        ]\r\n    }\r\n]"
+          headers: {}
+      security: []
+  /api/Category/1/Item/2/Ingredient/1:
+    get:
+      summary: Get by everyone ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Hierarchija
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get by everyone ID
+                  value: "{\r\n    \"categoryId\": {integer},\r\n    \"categoryName\": {string},\r\n    \"itemId\": {integer},\r\n    \"itemName\": {string},\r\n    \"ingredient\": {\r\n        \"id\": {integer},\r\n        \"name\": {string},\r\n        \"defaultQuantity\": {integer},\r\n        \"extraCost\": {integer},\r\n        \"itemIds\": [{integer}]\r\n    }\r\n}"
+          headers: {}
+      security: []
+  /api/Category/1:
+    get:
+      summary: Get a category by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get a category by ID
+                  value: "{\r\n    \"id\": {integer},\r\n    \"name\": \"{string}\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Delete a category by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters: []
+      responses:
+        '204':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /api/Category/8:
+    get:
+      summary: Category not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Category not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Category with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Category/2:
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+              required:
+                - id
+                - name
+            example:
+              id: '2'
+              name: Šerbetas213
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Bad Request\",\r\n    \"status\": 400,\r\n    \"detail\": \"Category name must consist of only letters and be a maximum of 20 characters.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Category/12:
+    put:
+      summary: Category not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+              required:
+                - id
+                - name
+            example:
+              id: '2'
+              name: Kokteiliai
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Category not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Category with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Category not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Category not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Category with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Category:
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Category
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+            example:
+              name: Kava1
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Bad Request\",\r\n    \"status\": 400,\r\n    \"detail\": \"A category with the name '{Name}' already exists.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Item:
+    get:
+      summary: Get all items
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get all items
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"categoryId\": \"integer\",\r\n    \"category\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\"\r\n    },\r\n    \"ingredientNames\": \"array<string>\",\r\n    \"ingredients\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        },\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        }\r\n    ],\r\n    \"price\": \"float\"\r\n}\r\n\r\n{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"categoryId\": \"integer\",\r\n    \"category\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\"\r\n    },\r\n    \"ingredientNames\": \"array<string>\",\r\n    \"ingredients\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        },\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        }\r\n    ],\r\n    \"price\": \"float\"\r\n}\r\n"
+          headers: {}
+      security: []
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: integer
+                Name:
+                  type: string
+                CategoryId:
+                  type: integer
+                Category:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                  required:
+                    - Id
+                    - Name
+                IngredientNames:
+                  type: array
+                  items:
+                    type: string
+                Ingredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Id:
+                        type: integer
+                      Name:
+                        type: string
+                      DefaultQuantity:
+                        type: integer
+                      ExtraCost:
+                        type: integer
+                    required:
+                      - Id
+                      - Name
+                      - DefaultQuantity
+                      - ExtraCost
+                Price:
+                  type: integer
+              required:
+                - Id
+                - Name
+                - CategoryId
+                - Category
+                - IngredientNames
+                - Ingredients
+                - Price
+            example:
+              Id: 10
+              Name: Latte Updated2
+              CategoryId: 1
+              Category:
+                Id: 1
+                Name: Kava
+              IngredientNames:
+                - Pienas
+                - Espresso
+              Ingredients:
+                - Id: 1
+                  Name: Pienas
+                  DefaultQuantity: 1
+                  ExtraCost: 0
+                - Id: 2
+                  Name: Espresso
+                  DefaultQuantity: 1
+                  ExtraCost: 1
+              Price: 5
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"BadRequest\",\r\n    \"status\": 400,\r\n    \"detail\": \"Item name can only contain English and Lithuanian letters.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Item/1:
+    get:
+      summary: Get an item by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  categoryId:
+                    type: string
+                  category:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                      - id
+                      - name
+                  ingredientNames:
+                    type: string
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        defaultQuantity:
+                          type: string
+                        extraCost:
+                          type: string
+                      required:
+                        - id
+                        - name
+                        - defaultQuantity
+                        - extraCost
+                  price:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - categoryId
+                  - category
+                  - ingredientNames
+                  - ingredients
+                  - price
+              examples:
+                '1':
+                  summary: Get an item by ID
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"categoryId\": \"integer\",\r\n    \"category\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\"\r\n    },\r\n    \"ingredientNames\": \"array<string>\",\r\n    \"ingredients\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        },\r\n        {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"defaultQuantity\": \"integer\",\r\n            \"extraCost\": \"float\"\r\n        }\r\n    ],\r\n    \"price\": \"float\"\r\n}\r\n"
+          headers: {}
+      security: []
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                categoryId:
+                  type: integer
+                ingredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      defaultQuantity:
+                        type: integer
+                      extraCost:
+                        type: number
+                      itemIds:
+                        type: array
+                        items:
+                          type: integer
+                price:
+                  type: number
+              required:
+                - id
+                - name
+                - categoryId
+                - ingredients
+                - price
+            example:
+              id: 1
+              name: Kava123
+              categoryId: 2
+              ingredients:
+                - id: 2
+                  name: Kavos pupelės
+                  defaultQuantity: 50
+                  extraCost: 0.5
+                  itemIds:
+                    - 1
+              price: 2.5
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"BadRequest\",\r\n    \"status\": 400,\r\n    \"detail\": \"Item name can only contain English and Lithuanian letters.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Delete an item by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /api/Item/8:
+    get:
+      summary: Item not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Item not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Item with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    put:
+      summary: Item not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                CategoryId:
+                  type: integer
+                Category:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                  required:
+                    - Id
+                    - Name
+                IngredientNames:
+                  type: array
+                  items:
+                    type: string
+                Ingredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Id:
+                        type: integer
+                      Name:
+                        type: string
+                      DefaultQuantity:
+                        type: integer
+                      ExtraCost:
+                        type: integer
+                    required:
+                      - Id
+                      - Name
+                      - DefaultQuantity
+                      - ExtraCost
+                Price:
+                  type: integer
+              required:
+                - Name
+                - CategoryId
+                - Category
+                - IngredientNames
+                - Ingredients
+                - Price
+            example:
+              Name: Latte Updated
+              CategoryId: 1
+              Category:
+                Id: 1
+                Name: Kava
+              IngredientNames:
+                - Pienas
+                - Espresso
+              Ingredients:
+                - Id: 1
+                  Name: Pienas
+                  DefaultQuantity: 1
+                  ExtraCost: 0
+                - Id: 2
+                  Name: Espresso
+                  DefaultQuantity: 1
+                  ExtraCost: 1
+              Price: 5
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Item not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Item with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Item not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Item
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Item not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Item with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Ingredient:
+    get:
+      summary: Get all ingredients
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get all ingredients
+                  value: "{\r\n    \"id\": {integer},\r\n    \"name\": {string},\r\n    \"defaultQuantity\": {integer},\r\n    \"extraCost\": {integer}\r\n}\r\n{\r\n    \"id\": {integer},\r\n    \"name\": {string},\r\n    \"defaultQuantity\": {integer},\r\n    \"extraCost\": {integer}\r\n}"
+          headers: {}
+      security: []
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                defaultQuantity:
+                  type: integer
+                extraCost:
+                  type: number
+              required:
+                - id
+                - name
+                - defaultQuantity
+                - extraCost
+            example:
+              id: 13
+              name: Taro perlai
+              defaultQuantity: 0
+              extraCost: 0.5
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Validation Error\",\r\n    \"status\": 400,\r\n    \"detail\": \"Default Quantity must be a positive number.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Ingredient/1:
+    get:
+      summary: Get an ingredient by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get an ingredient by ID
+                  value: "{\r\n    \"id\": {integer},\r\n    \"name\": {string},\r\n    \"defaultQuantity\": {integer},\r\n    \"extraCost\": {integer}\r\n}"
+          headers: {}
+      security: []
+    put:
+      summary: Update an ingredient by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                DefaultQuantity:
+                  type: integer
+                ExtraCost:
+                  type: integer
+              required:
+                - Name
+                - DefaultQuantity
+                - ExtraCost
+            example:
+              Name: Šokoladinis pienas
+              DefaultQuantity: 1
+              ExtraCost: 0
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Update an ingredient by ID
+                  value: "{\r\n    \"id\": {integer},\r\n    \"name\": {string},\r\n    \"defaultQuantity\": {integer},\r\n    \"extraCost\": {integer}\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Delete an ingredient by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      responses:
+        '204':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /api/Ingredient/10:
+    get:
+      summary: Ingredient not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Ingredient not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Ingredient with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    put:
+      summary: Ingredient not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                DefaultQuantity:
+                  type: integer
+                ExtraCost:
+                  type: integer
+              required:
+                - Name
+                - DefaultQuantity
+                - ExtraCost
+            example:
+              Name: Šokoladinis pienas
+              DefaultQuantity: 1
+              ExtraCost: 0
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Ingredient not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Ingredient with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Ingredient not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Ingredient not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Ingredient with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Ingredient/2:
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Ingredient
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                DefaultQuantity:
+                  type: integer
+                ExtraCost:
+                  type: integer
+              required:
+                - Name
+                - DefaultQuantity
+                - ExtraCost
+            example:
+              Name: Šokoladinis pienas
+              DefaultQuantity: -1
+              ExtraCost: 0
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Validation Error\",\r\n    \"status\": 400,\r\n    \"detail\": \"Default Quantity must be a positive number.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Cart/1:
+    get:
+      summary: Get a cart by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  name:
+                    type: string
+                  isSelected:
+                    type: string
+                  cartItems:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        count:
+                          type: string
+                        itemId:
+                          type: string
+                        item:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            categoryId:
+                              type: string
+                            category:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                            ingredientNames:
+                              type: string
+                            ingredients:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                  defaultQuantity:
+                                    type: string
+                                  extraCost:
+                                    type: string
+                                required:
+                                  - id
+                                  - name
+                                  - defaultQuantity
+                                  - extraCost
+                            price:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - categoryId
+                            - category
+                            - ingredientNames
+                            - ingredients
+                            - price
+                        cartId:
+                          type: string
+                        cart:
+                          type: string
+                        modifiedIngredients:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              quantity:
+                                type: string
+                        totalPrice:
+                          type: string
+                  userId:
+                    type: string
+                  user:
+                    type: string
+                  status:
+                    type: string
+                required:
+                  - _id
+                  - name
+                  - isSelected
+                  - cartItems
+                  - userId
+                  - user
+                  - status
+              examples:
+                '1':
+                  summary: Get a cart by ID
+                  value: "{\r\n    \"_id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"isSelected\": \"boolean\",\r\n    \"cartItems\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"count\": \"integer\",\r\n            \"itemId\": \"integer\",\r\n            \"item\": {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"categoryId\": \"integer\",\r\n                \"category\": {\r\n                    \"id\": \"integer\",\r\n                    \"name\": \"string\"\r\n                },\r\n                \"ingredientNames\": \"array<string>\",\r\n                \"ingredients\": [\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    },\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    }\r\n                ],\r\n                \"price\": \"float\"\r\n            },\r\n            \"cartId\": \"integer\",\r\n            \"cart\": \"object\",\r\n            \"modifiedIngredients\": [\r\n                {\r\n                    \"name\": \"string\",\r\n                    \"quantity\": \"integer\"\r\n                }\r\n            ],\r\n            \"totalPrice\": \"float\"\r\n        }\r\n    ],\r\n    \"userId\": \"integer\",\r\n    \"user\": \"object\",\r\n    \"status\": \"string\"\r\n}\r\n"
+          headers: {}
+      security: []
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: integer
+                Name:
+                  type: string
+                User:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    UserLoginId:
+                      type: integer
+                    Role:
+                      type: string
+                    Carts:
+                      type: array
+                      items:
+                        type: string
+                    UserLogin:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Username:
+                          type: string
+                        Password:
+                          type: string
+                        Token:
+                          type: string
+                      required:
+                        - Id
+                        - Username
+                        - Password
+                        - Token
+                  required:
+                    - Id
+                    - Name
+                    - UserLoginId
+                    - Role
+                    - Carts
+                    - UserLogin
+                Status:
+                  type: string
+                CartItems:
+                  type: array
+                  items:
+                    type: string
+                userId:
+                  type: integer
+                IsSelected:
+                  type: boolean
+              required:
+                - _id
+                - Name
+                - User
+                - Status
+                - CartItems
+                - userId
+                - IsSelected
+            example:
+              _id: 1
+              Name: Domas1's Cart
+              User:
+                Id: 1
+                Name: Domas
+                UserLoginId: 1
+                Role: Member
+                Carts: []
+                UserLogin:
+                  Id: 1
+                  Username: Domas123
+                  Password: password123
+                  Token: abcd1234
+              Status: Active
+              CartItems: []
+              userId: 1
+              IsSelected: false
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    propertyName:
+                      type: string
+                    errorMessage:
+                      type: string
+                    attemptedValue:
+                      type: string
+                    customState:
+                      type: 'boolean'
+                    severity:
+                      type: integer
+                    errorCode:
+                      type: string
+                    formattedMessagePlaceholderValues:
+                      type: object
+                      properties:
+                        RegularExpression:
+                          type: string
+                        PropertyName:
+                          type: string
+                        PropertyValue:
+                          type: string
+                      required:
+                        - RegularExpression
+                        - PropertyName
+                        - PropertyValue
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "[\r\n    {\r\n        \"propertyName\": \"Name\",\r\n        \"errorMessage\": \"The name must be '{Name}'s Cart'.\",\r\n        \"attemptedValue\": \"{Name}'s Cart\",\r\n        \"customState\": null,\r\n        \"severity\": 0,\r\n        \"errorCode\": \"RegularExpressionValidator\",\r\n        \"formattedMessagePlaceholderValues\": {\r\n            \"RegularExpression\": \"^{Name}'s Cart$\",\r\n            \"PropertyName\": \"Name\",\r\n            \"PropertyValue\": \"{Name}'s Cart\"\r\n        }\r\n    }\r\n]"
+          headers: {}
+      security: []
+  /api/Cart/5:
+    get:
+      summary: Cart not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Cart not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Cart with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: Cart not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Cart not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Cart with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Cart:
+    get:
+      summary: Get all carts
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get all carts
+                  value: "{\r\n    \"_id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"isSelected\": \"boolean\",\r\n    \"cartItems\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"count\": \"integer\",\r\n            \"itemId\": \"integer\",\r\n            \"item\": {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"categoryId\": \"integer\",\r\n                \"category\": {\r\n                    \"id\": \"integer\",\r\n                    \"name\": \"string\"\r\n                },\r\n                \"ingredientNames\": \"array<string>\",\r\n                \"ingredients\": [\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    },\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    }\r\n                ],\r\n                \"price\": \"float\"\r\n            },\r\n            \"cartId\": \"integer\",\r\n            \"cart\": \"object\",\r\n            \"modifiedIngredients\": [\r\n                {\r\n                    \"name\": \"string\",\r\n                    \"quantity\": \"integer\"\r\n                }\r\n            ],\r\n            \"totalPrice\": \"float\"\r\n        }\r\n    ],\r\n    \"userId\": \"integer\",\r\n    \"user\": \"object\",\r\n    \"status\": \"string\"\r\n}\r\n{\r\n    \"_id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"isSelected\": \"boolean\",\r\n    \"cartItems\": [\r\n        {\r\n            \"id\": \"integer\",\r\n            \"count\": \"integer\",\r\n            \"itemId\": \"integer\",\r\n            \"item\": {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"categoryId\": \"integer\",\r\n                \"category\": {\r\n                    \"id\": \"integer\",\r\n                    \"name\": \"string\"\r\n                },\r\n                \"ingredientNames\": \"array<string>\",\r\n                \"ingredients\": [\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    },\r\n                    {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"defaultQuantity\": \"integer\",\r\n                        \"extraCost\": \"float\"\r\n                    }\r\n                ],\r\n                \"price\": \"float\"\r\n            },\r\n            \"cartId\": \"integer\",\r\n            \"cart\": \"object\",\r\n            \"modifiedIngredients\": [\r\n                {\r\n                    \"name\": \"string\",\r\n                    \"quantity\": \"integer\"\r\n                }\r\n            ],\r\n            \"totalPrice\": \"float\"\r\n        }\r\n    ],\r\n    \"userId\": \"integer\",\r\n    \"user\": \"object\",\r\n    \"status\": \"string\"\r\n}\r\n"
+          headers: {}
+      security: []
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: integer
+                Name:
+                  type: string
+                IsSelected:
+                  type: boolean
+                UserId:
+                  type: integer
+                User:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    UserLoginId:
+                      type: integer
+                    UserLogin:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Username:
+                          type: string
+                        Password:
+                          type: string
+                        Token:
+                          type: string
+                      required:
+                        - Id
+                        - Username
+                        - Password
+                        - Token
+                    Points:
+                      type: integer
+                    Role:
+                      type: string
+                    Carts:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - Id
+                    - Name
+                    - UserLoginId
+                    - UserLogin
+                    - Points
+                    - Role
+                    - Carts
+                Status:
+                  type: string
+                CartItems:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - _id
+                - Name
+                - IsSelected
+                - UserId
+                - User
+                - Status
+                - CartItems
+            example:
+              _id: 13
+              Name: Domas4's Cart
+              IsSelected: true
+              UserId: 1
+              User:
+                Id: 1
+                Name: Domas123
+                UserLoginId: 1
+                UserLogin:
+                  Id: 1
+                  Username: Domas123
+                  Password: newpassword
+                  Token: efgh5678
+                Points: 200
+                Role: Member
+                Carts: []
+              Status: Active
+              CartItems: []
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    propertyName:
+                      type: string
+                    errorMessage:
+                      type: string
+                    attemptedValue:
+                      type: string
+                    customState:
+                      type: 'boolean'
+                    severity:
+                      type: integer
+                    errorCode:
+                      type: string
+                    formattedMessagePlaceholderValues:
+                      type: object
+                      properties:
+                        RegularExpression:
+                          type: string
+                        PropertyName:
+                          type: string
+                        PropertyValue:
+                          type: string
+                      required:
+                        - RegularExpression
+                        - PropertyName
+                        - PropertyValue
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "[\r\n    {\r\n        \"propertyName\": \"Name\",\r\n        \"errorMessage\": \"The name must be '{Name}'s Cart'.\",\r\n        \"attemptedValue\": \"{Name}'s Cart\",\r\n        \"customState\": null,\r\n        \"severity\": 0,\r\n        \"errorCode\": \"RegularExpressionValidator\",\r\n        \"formattedMessagePlaceholderValues\": {\r\n            \"RegularExpression\": \"^{Name}'s Cart$\",\r\n            \"PropertyName\": \"Name\",\r\n            \"PropertyValue\": \"{Name}'s Cart\"\r\n        }\r\n    }\r\n]"
+          headers: {}
+      security: []
+  /api/Cart/10:
+    put:
+      summary: Cart not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: integer
+                Name:
+                  type: string
+                User:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    UserLoginId:
+                      type: integer
+                    Role:
+                      type: string
+                    Carts:
+                      type: array
+                      items:
+                        type: string
+                    UserLogin:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Username:
+                          type: string
+                        Password:
+                          type: string
+                        Token:
+                          type: string
+                      required:
+                        - Id
+                        - Username
+                        - Password
+                        - Token
+                  required:
+                    - Id
+                    - Name
+                    - UserLoginId
+                    - Role
+                    - Carts
+                    - UserLogin
+                Status:
+                  type: string
+                CartItems:
+                  type: array
+                  items:
+                    type: string
+                IsSelected:
+                  type: boolean
+              required:
+                - _id
+                - Name
+                - User
+                - Status
+                - CartItems
+                - IsSelected
+            example:
+              _id: 1
+              Name: Domas's Cart
+              User:
+                Id: 1
+                Name: Domas
+                UserLoginId: 1
+                Role: Member
+                Carts: []
+                UserLogin:
+                  Id: 1
+                  Username: Domas123
+                  Password: password123
+                  Token: abcd1234
+              Status: Active
+              CartItems: []
+              IsSelected: false
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Cart not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"Cart with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/Cart/2:
+    delete:
+      summary: Delete a cart by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/Cart
+      parameters: []
+      responses:
+        '204':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /api/CartItem:
+    get:
+      summary: Get all cart items
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  count:
+                    type: string
+                  itemId:
+                    type: string
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      categoryId:
+                        type: string
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                          - id
+                          - name
+                      ingredientNames:
+                        type: string
+                      ingredients:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            defaultQuantity:
+                              type: string
+                            extraCost:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - defaultQuantity
+                            - extraCost
+                      price:
+                        type: string
+                    required:
+                      - id
+                      - name
+                      - categoryId
+                      - category
+                      - ingredientNames
+                      - ingredients
+                      - price
+                  cartId:
+                    type: string
+                  cart:
+                    type: string
+                  modifiedIngredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        quantity:
+                          type: string
+                  totalPrice:
+                    type: string
+                required:
+                  - id
+                  - count
+                  - itemId
+                  - item
+                  - cartId
+                  - cart
+                  - modifiedIngredients
+                  - totalPrice
+              examples:
+                '1':
+                  summary: Get all cart items
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"count\": \"integer\",\r\n    \"itemId\": \"integer\",\r\n    \"item\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\",\r\n        \"categoryId\": \"integer\",\r\n        \"category\": {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\"\r\n        },\r\n        \"ingredientNames\": \"array<string>\",\r\n        \"ingredients\": [\r\n            {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"defaultQuantity\": \"integer\",\r\n                \"extraCost\": \"float\"\r\n            },\r\n            {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"defaultQuantity\": \"integer\",\r\n                \"extraCost\": \"float\"\r\n            }\r\n        ],\r\n        \"price\": \"float\"\r\n    },\r\n    \"cartId\": \"integer\",\r\n    \"cart\": \"object\",\r\n    \"modifiedIngredients\": [\r\n        {\r\n            \"name\": \"string\",\r\n            \"quantity\": \"integer\"\r\n        }\r\n    ],\r\n    \"totalPrice\": \"float\"\r\n}\r\n"
+          headers: {}
+      security: []
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: integer
+                Count:
+                  type: integer
+                ItemId:
+                  type: integer
+                Item:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    Price:
+                      type: number
+                    Category:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                      required:
+                        - Id
+                        - Name
+                    Ingredients:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          DefaultQuantity:
+                            type: integer
+                          ExtraCost:
+                            type: integer
+                        required:
+                          - Id
+                          - Name
+                          - DefaultQuantity
+                          - ExtraCost
+                    IngredientNames:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - Id
+                    - Name
+                    - Price
+                    - Category
+                    - Ingredients
+                    - IngredientNames
+                CartId:
+                  type: integer
+                Cart:
+                  type: object
+                  properties:
+                    _id:
+                      type: integer
+                    Name:
+                      type: string
+                    IsSelected:
+                      type: boolean
+                    UserId:
+                      type: integer
+                    User:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                        Points:
+                          type: integer
+                        Role:
+                          type: string
+                        Carts:
+                          type: array
+                          items:
+                            type: string
+                        UserLogin:
+                          type: object
+                          properties:
+                            Token:
+                              type: string
+                            Password:
+                              type: string
+                            Username:
+                              type: string
+                          required:
+                            - Token
+                            - Password
+                            - Username
+                      required:
+                        - Id
+                        - Name
+                        - Points
+                        - Role
+                        - Carts
+                        - UserLogin
+                    CartItems:
+                      type: array
+                      items:
+                        type: string
+                    Status:
+                      type: string
+                  required:
+                    - _id
+                    - Name
+                    - IsSelected
+                    - UserId
+                    - User
+                    - CartItems
+                    - Status
+                ModifiedIngredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Quantity:
+                        type: integer
+                    required:
+                      - Name
+                      - Quantity
+                TotalPrice:
+                  type: number
+              required:
+                - Id
+                - Count
+                - ItemId
+                - Item
+                - CartId
+                - Cart
+                - ModifiedIngredients
+                - TotalPrice
+            example:
+              Id: 12
+              Count: 2
+              ItemId: 8
+              Item:
+                Id: 1
+                Name: Latte
+                Price: 4.5
+                Category:
+                  Id: 1
+                  Name: Kava
+                Ingredients:
+                  - Id: 1
+                    Name: Pienas
+                    DefaultQuantity: 1
+                    ExtraCost: 0
+                  - Id: 2
+                    Name: Espresso
+                    DefaultQuantity: 1
+                    ExtraCost: 1
+                IngredientNames:
+                  - Pienas
+                  - Espresso
+              CartId: 1
+              Cart:
+                _id: 1
+                Name: Domas123's Cart
+                IsSelected: true
+                UserId: 1
+                User:
+                  Id: 1
+                  Name: Domas123
+                  Points: 100
+                  Role: Member
+                  Carts: []
+                  UserLogin:
+                    Token: abcd1234
+                    Password: password123
+                    Username: Domas123
+                CartItems: []
+                Status: Active
+              ModifiedIngredients:
+                - Name: Espresso
+                  Quantity: 4
+                - Name: Pienas
+                  Quantity: 1
+              TotalPrice: 10.5
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Bad Request\",\r\n    \"status\": 400,\r\n    \"detail\": \"Item not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/CartItem/1:
+    get:
+      summary: Get a cart item by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  count:
+                    type: string
+                  itemId:
+                    type: string
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      categoryId:
+                        type: string
+                      category:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                          - id
+                          - name
+                      ingredientNames:
+                        type: string
+                      ingredients:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            defaultQuantity:
+                              type: string
+                            extraCost:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - defaultQuantity
+                            - extraCost
+                      price:
+                        type: string
+                    required:
+                      - id
+                      - name
+                      - categoryId
+                      - category
+                      - ingredientNames
+                      - ingredients
+                      - price
+                  cartId:
+                    type: string
+                  cart:
+                    type: string
+                  modifiedIngredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        quantity:
+                          type: string
+                  totalPrice:
+                    type: string
+                required:
+                  - id
+                  - count
+                  - itemId
+                  - item
+                  - cartId
+                  - cart
+                  - modifiedIngredients
+                  - totalPrice
+              examples:
+                '1':
+                  summary: Get a cart item by ID
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"count\": \"integer\",\r\n    \"itemId\": \"integer\",\r\n    \"item\": {\r\n        \"id\": \"integer\",\r\n        \"name\": \"string\",\r\n        \"categoryId\": \"integer\",\r\n        \"category\": {\r\n            \"id\": \"integer\",\r\n            \"name\": \"string\"\r\n        },\r\n        \"ingredientNames\": \"array<string>\",\r\n        \"ingredients\": [\r\n            {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"defaultQuantity\": \"integer\",\r\n                \"extraCost\": \"float\"\r\n            },\r\n            {\r\n                \"id\": \"integer\",\r\n                \"name\": \"string\",\r\n                \"defaultQuantity\": \"integer\",\r\n                \"extraCost\": \"float\"\r\n            }\r\n        ],\r\n        \"price\": \"float\"\r\n    },\r\n    \"cartId\": \"integer\",\r\n    \"cart\": \"object\",\r\n    \"modifiedIngredients\": [\r\n        {\r\n            \"name\": \"string\",\r\n            \"quantity\": \"integer\"\r\n        }\r\n    ],\r\n    \"totalPrice\": \"float\"\r\n}\r\n"
+          headers: {}
+      security: []
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                Count:
+                  type: integer
+                ItemId:
+                  type: integer
+                CartId:
+                  type: integer
+                TotalPrice:
+                  type: number
+                ModifiedIngredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Quantity:
+                        type: integer
+                Item:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    Price:
+                      type: number
+                    CategoryId:
+                      type: integer
+                    Category:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                      required:
+                        - Id
+                        - Name
+                    Ingredients:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          DefaultQuantity:
+                            type: integer
+                          ExtraCost:
+                            type: integer
+                        required:
+                          - Id
+                          - Name
+                          - DefaultQuantity
+                          - ExtraCost
+                    IngredientNames:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - Id
+                    - Name
+                    - Price
+                    - CategoryId
+                    - Category
+                    - Ingredients
+                    - IngredientNames
+                Cart:
+                  type: object
+                  properties:
+                    Name:
+                      type: string
+                    UserId:
+                      type: integer
+                    Status:
+                      type: string
+                    User:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                        Points:
+                          type: integer
+                        Role:
+                          type: string
+                        UserLogin:
+                          type: object
+                          properties:
+                            Id:
+                              type: integer
+                            Username:
+                              type: string
+                            Password:
+                              type: string
+                            Token:
+                              type: string
+                          required:
+                            - Id
+                            - Username
+                            - Password
+                            - Token
+                        Carts:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - Id
+                        - Name
+                        - Points
+                        - Role
+                        - UserLogin
+                        - Carts
+                    CartItems:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - Name
+                    - UserId
+                    - Status
+                    - User
+                    - CartItems
+              required:
+                - id
+                - Count
+                - ItemId
+                - CartId
+                - TotalPrice
+                - ModifiedIngredients
+                - Item
+                - Cart
+            example:
+              id: 1
+              Count: -1
+              ItemId: 1
+              CartId: 1
+              TotalPrice: 9.5
+              ModifiedIngredients:
+                - Name: Espresso
+                  Quantity: 1
+              Item:
+                Id: 1
+                Name: Latte
+                Price: 4.5
+                CategoryId: 1
+                Category:
+                  Id: 1
+                  Name: Kava
+                Ingredients:
+                  - Id: 1
+                    Name: Pienas
+                    DefaultQuantity: 1
+                    ExtraCost: 0
+                  - Id: 2
+                    Name: Espresso
+                    DefaultQuantity: 1
+                    ExtraCost: 1
+                IngredientNames:
+                  - Pienas
+                  - Espresso
+              Cart:
+                Name: Domas123's Cart
+                UserId: 1
+                Status: Active
+                User:
+                  Id: 1
+                  Name: Domas123
+                  Points: 100
+                  Role: Member
+                  UserLogin:
+                    Id: 1
+                    Username: Domas123
+                    Password: password123
+                    Token: abcd1234
+                  Carts: []
+                CartItems: []
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n    \"title\": \"Bad Request\",\r\n    \"status\": 400,\r\n    \"detail\": \"Total price cannot be negative.\"\r\n}"
+          headers: {}
+      security: []
+  /api/CartItem/5:
+    get:
+      summary: CartItem not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: CartItem not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"CartItem with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/CartItem/20:
+    put:
+      summary: Cart not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/CartItem
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: integer
+                Count:
+                  type: integer
+                ItemId:
+                  type: integer
+                CartId:
+                  type: integer
+                TotalPrice:
+                  type: number
+                ModifiedIngredients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Quantity:
+                        type: integer
+                Item:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Name:
+                      type: string
+                    Price:
+                      type: number
+                    CategoryId:
+                      type: integer
+                    Category:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                      required:
+                        - Id
+                        - Name
+                    Ingredients:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          DefaultQuantity:
+                            type: integer
+                          ExtraCost:
+                            type: integer
+                        required:
+                          - Id
+                          - Name
+                          - DefaultQuantity
+                          - ExtraCost
+                    IngredientNames:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - Id
+                    - Name
+                    - Price
+                    - CategoryId
+                    - Category
+                    - Ingredients
+                    - IngredientNames
+                Cart:
+                  type: object
+                  properties:
+                    _id:
+                      type: integer
+                    Name:
+                      type: string
+                    UserId:
+                      type: integer
+                    Status:
+                      type: string
+                    User:
+                      type: object
+                      properties:
+                        Id:
+                          type: integer
+                        Name:
+                          type: string
+                        Points:
+                          type: integer
+                        Role:
+                          type: string
+                        UserLogin:
+                          type: object
+                          properties:
+                            Id:
+                              type: integer
+                            Username:
+                              type: string
+                            Password:
+                              type: string
+                            Token:
+                              type: string
+                          required:
+                            - Id
+                            - Username
+                            - Password
+                            - Token
+                        Carts:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - Id
+                        - Name
+                        - Points
+                        - Role
+                        - UserLogin
+                        - Carts
+                    CartItems:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - _id
+                    - Name
+                    - UserId
+                    - Status
+                    - User
+                    - CartItems
+              required:
+                - Id
+                - Count
+                - ItemId
+                - CartId
+                - TotalPrice
+                - ModifiedIngredients
+                - Item
+                - Cart
+            example:
+              Id: 1
+              Count: 1
+              ItemId: 1
+              CartId: 1
+              TotalPrice: 9.5
+              ModifiedIngredients:
+                - Name: Espresso
+                  Quantity: 1
+              Item:
+                Id: 1
+                Name: Latte
+                Price: 4.5
+                CategoryId: 1
+                Category:
+                  Id: 1
+                  Name: Kava
+                Ingredients:
+                  - Id: 1
+                    Name: Pienas
+                    DefaultQuantity: 1
+                    ExtraCost: 0
+                  - Id: 2
+                    Name: Espresso
+                    DefaultQuantity: 1
+                    ExtraCost: 1
+                IngredientNames:
+                  - Pienas
+                  - Espresso
+              Cart:
+                _id: 1
+                Name: Domas123's Cart
+                UserId: 1
+                Status: Active
+                User:
+                  Id: 1
+                  Name: Domas123
+                  Points: 100
+                  Role: Member
+                  UserLogin:
+                    Id: 1
+                    Username: Domas123
+                    Password: password123
+                    Token: abcd1234
+                  Carts: []
+                CartItems: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: Cart not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"CartItem with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/User:
+    post:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: integer
+                Name:
+                  type: string
+                Points:
+                  type: integer
+                Role:
+                  type: string
+                UserLogin:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Username:
+                      type: string
+                    Password:
+                      type: string
+                    Token:
+                      type: string
+                  required:
+                    - Id
+                    - Username
+                    - Password
+                    - Token
+                Carts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: integer
+                      Name:
+                        type: string
+                      IsSelected:
+                        type: boolean
+                      UserId:
+                        type: integer
+                      User:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          Role:
+                            type: string
+                          Carts:
+                            type: array
+                            items:
+                              type: string
+                          UserLogin:
+                            type: object
+                            properties:
+                              Id:
+                                type: integer
+                              Username:
+                                type: string
+                              Password:
+                                type: string
+                              Token:
+                                type: string
+                            required:
+                              - Id
+                              - Username
+                              - Password
+                              - Token
+                        required:
+                          - Id
+                          - Name
+                          - Role
+                          - Carts
+                          - UserLogin
+                      Status:
+                        type: string
+                      CartItems:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            Id:
+                              type: integer
+                            Count:
+                              type: integer
+                            ItemId:
+                              type: integer
+                            Item:
+                              type: object
+                              properties:
+                                Id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                CategoryId:
+                                  type: integer
+                                Category:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                  required:
+                                    - Id
+                                    - Name
+                                Ingredients:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      Id:
+                                        type: integer
+                                      Name:
+                                        type: string
+                                      DefaultQuantity:
+                                        type: integer
+                                      ExtraCost:
+                                        type: integer
+                                    required:
+                                      - Id
+                                      - Name
+                                      - DefaultQuantity
+                                      - ExtraCost
+                                IngredientNames:
+                                  type: array
+                                  items:
+                                    type: string
+                                Price:
+                                  type: number
+                              required:
+                                - Id
+                                - Name
+                                - CategoryId
+                                - Category
+                                - Ingredients
+                                - IngredientNames
+                                - Price
+                            CartId:
+                              type: integer
+                            Cart:
+                              type: object
+                              properties:
+                                _id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                UserId:
+                                  type: integer
+                                User:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                    Role:
+                                      type: string
+                                    Carts:
+                                      type: array
+                                      items:
+                                        type: string
+                                    UserLogin:
+                                      type: object
+                                      properties:
+                                        Id:
+                                          type: integer
+                                        Username:
+                                          type: string
+                                        Password:
+                                          type: string
+                                        Token:
+                                          type: string
+                                      required:
+                                        - Id
+                                        - Username
+                                        - Password
+                                        - Token
+                                  required:
+                                    - Id
+                                    - Name
+                                    - Role
+                                    - Carts
+                                    - UserLogin
+                                Status:
+                                  type: string
+                                CartItems:
+                                  type: array
+                                  items:
+                                    type: string
+                              required:
+                                - _id
+                                - Name
+                                - UserId
+                                - User
+                                - Status
+                                - CartItems
+                            TotalPrice:
+                              type: integer
+                            ModifiedIngredients:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  Name:
+                                    type: string
+                                  Quantity:
+                                    type: integer
+              required:
+                - Id
+                - Name
+                - Points
+                - Role
+                - UserLogin
+                - Carts
+            example:
+              Id: 10
+              Name: Titas2
+              Points: -1
+              Role: Member
+              UserLogin:
+                Id: 1
+                Username: Domas
+                Password: password123
+                Token: abcd1234
+              Carts:
+                - _id: 1
+                  Name: Domas's Cart
+                  IsSelected: true
+                  UserId: 1
+                  User:
+                    Id: 1
+                    Name: Domas12
+                    Role: Member
+                    Carts: []
+                    UserLogin:
+                      Id: 1
+                      Username: Domas12
+                      Password: password123
+                      Token: abcd1234
+                  Status: Active
+                  CartItems:
+                    - Id: 1
+                      Count: 2
+                      ItemId: 1
+                      Item:
+                        Id: 1
+                        Name: Latte
+                        CategoryId: 1
+                        Category:
+                          Id: 1
+                          Name: Kava
+                        Ingredients:
+                          - Id: 1
+                            Name: Pienas
+                            DefaultQuantity: 1
+                            ExtraCost: 0
+                          - Id: 2
+                            Name: Espresso
+                            DefaultQuantity: 1
+                            ExtraCost: 1
+                        IngredientNames:
+                          - Pienas
+                          - Espresso
+                        Price: 4.5
+                      CartId: 1
+                      Cart:
+                        _id: 1
+                        Name: Domas's Cart
+                        UserId: 1
+                        User:
+                          Id: 1
+                          Name: Domas
+                          Role: Member
+                          Carts: []
+                          UserLogin:
+                            Id: 1
+                            Username: Domas
+                            Password: password123
+                            Token: abcd1234
+                        Status: Active
+                        CartItems: []
+                      TotalPrice: 11
+                      ModifiedIngredients:
+                        - Name: Espresso
+                          Quantity: 2
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "{\r\n        \"propertyName\": \"Points\",\r\n        \"errorMessage\": \"Points must be a non-negative value.\",\r\n        \"attemptedValue\": {integer},\r\n        \"customState\": null,\r\n        \"severity\": 0,\r\n        \"errorCode\": \"GreaterThanOrEqualValidator\",\r\n        \"formattedMessagePlaceholderValues\": {\r\n            \"ComparisonValue\": 0,\r\n            \"ComparisonProperty\": \"\",\r\n            \"PropertyName\": \"Points\",\r\n            \"PropertyValue\": {integer}\r\n        }\r\n    }\r\n]"
+          headers: {}
+      security: []
+    get:
+      summary: Get all users
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Get all users
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"userLoginId\": \"integer\",\r\n    \"userLogin\": {\r\n        \"id\": \"integer\",\r\n        \"username\": \"string\",\r\n        \"password\": \"string\",\r\n        \"token\": \"string\"\r\n    },\r\n    \"carts\": [\r\n        {\r\n            \"_id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"isSelected\": \"boolean\",\r\n            \"cartItems\": [\r\n                {\r\n                    \"id\": \"integer\",\r\n                    \"count\": \"integer\",\r\n                    \"itemId\": \"integer\",\r\n                    \"item\": {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"categoryId\": \"integer\",\r\n                        \"category\": {\r\n                            \"id\": \"integer\",\r\n                            \"name\": \"string\"\r\n                        },\r\n                        \"ingredientNames\": \"array<string>\",\r\n                        \"ingredients\": [\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            },\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            }\r\n                        ],\r\n                        \"price\": \"float\"\r\n                    },\r\n                    \"cartId\": \"integer\",\r\n                    \"cart\": \"object\",\r\n                    \"modifiedIngredients\": [\r\n                        {\r\n                            \"name\": \"string\",\r\n                            \"quantity\": \"integer\"\r\n                        }\r\n                    ],\r\n                    \"totalPrice\": \"float\"\r\n                }\r\n            ],\r\n            \"userId\": \"integer\",\r\n            \"user\": \"object\",\r\n            \"status\": \"string\"\r\n        }\r\n    ],\r\n    \"points\": \"integer\",\r\n    \"role\": \"string\"\r\n}\r\n\r\n{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"userLoginId\": \"integer\",\r\n    \"userLogin\": {\r\n        \"id\": \"integer\",\r\n        \"username\": \"string\",\r\n        \"password\": \"string\",\r\n        \"token\": \"string\"\r\n    },\r\n    \"carts\": [\r\n        {\r\n            \"_id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"isSelected\": \"boolean\",\r\n            \"cartItems\": [\r\n                {\r\n                    \"id\": \"integer\",\r\n                    \"count\": \"integer\",\r\n                    \"itemId\": \"integer\",\r\n                    \"item\": {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"categoryId\": \"integer\",\r\n                        \"category\": {\r\n                            \"id\": \"integer\",\r\n                            \"name\": \"string\"\r\n                        },\r\n                        \"ingredientNames\": \"array<string>\",\r\n                        \"ingredients\": [\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            },\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            }\r\n                        ],\r\n                        \"price\": \"float\"\r\n                    },\r\n                    \"cartId\": \"integer\",\r\n                    \"cart\": \"object\",\r\n                    \"modifiedIngredients\": [\r\n                        {\r\n                            \"name\": \"string\",\r\n                            \"quantity\": \"integer\"\r\n                        }\r\n                    ],\r\n                    \"totalPrice\": \"float\"\r\n                }\r\n            ],\r\n            \"userId\": \"integer\",\r\n            \"user\": \"object\",\r\n            \"status\": \"string\"\r\n        }\r\n    ],\r\n    \"points\": \"integer\",\r\n    \"role\": \"string\"\r\n}\r\n"
+          headers: {}
+      security: []
+  /api/User/1:
+    get:
+      summary: Get user by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  userLoginId:
+                    type: string
+                  userLogin:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+                      password:
+                        type: string
+                      token:
+                        type: string
+                    required:
+                      - id
+                      - username
+                      - password
+                      - token
+                  carts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        name:
+                          type: string
+                        isSelected:
+                          type: string
+                        cartItems:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              count:
+                                type: string
+                              itemId:
+                                type: string
+                              item:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                  categoryId:
+                                    type: string
+                                  category:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      name:
+                                        type: string
+                                    required:
+                                      - id
+                                      - name
+                                  ingredientNames:
+                                    type: string
+                                  ingredients:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                        name:
+                                          type: string
+                                        defaultQuantity:
+                                          type: string
+                                        extraCost:
+                                          type: string
+                                      required:
+                                        - id
+                                        - name
+                                        - defaultQuantity
+                                        - extraCost
+                                  price:
+                                    type: string
+                                required:
+                                  - id
+                                  - name
+                                  - categoryId
+                                  - category
+                                  - ingredientNames
+                                  - ingredients
+                                  - price
+                              cartId:
+                                type: string
+                              cart:
+                                type: string
+                              modifiedIngredients:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                    quantity:
+                                      type: string
+                              totalPrice:
+                                type: string
+                        userId:
+                          type: string
+                        user:
+                          type: string
+                        status:
+                          type: string
+                  points:
+                    type: string
+                  role:
+                    type: string
+                required:
+                  - id
+                  - name
+                  - userLoginId
+                  - userLogin
+                  - carts
+                  - points
+                  - role
+              examples:
+                '1':
+                  summary: Get user by ID
+                  value: "{\r\n    \"id\": \"integer\",\r\n    \"name\": \"string\",\r\n    \"userLoginId\": \"integer\",\r\n    \"userLogin\": {\r\n        \"id\": \"integer\",\r\n        \"username\": \"string\",\r\n        \"password\": \"string\",\r\n        \"token\": \"string\"\r\n    },\r\n    \"carts\": [\r\n        {\r\n            \"_id\": \"integer\",\r\n            \"name\": \"string\",\r\n            \"isSelected\": \"boolean\",\r\n            \"cartItems\": [\r\n                {\r\n                    \"id\": \"integer\",\r\n                    \"count\": \"integer\",\r\n                    \"itemId\": \"integer\",\r\n                    \"item\": {\r\n                        \"id\": \"integer\",\r\n                        \"name\": \"string\",\r\n                        \"categoryId\": \"integer\",\r\n                        \"category\": {\r\n                            \"id\": \"integer\",\r\n                            \"name\": \"string\"\r\n                        },\r\n                        \"ingredientNames\": \"array<string>\",\r\n                        \"ingredients\": [\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            },\r\n                            {\r\n                                \"id\": \"integer\",\r\n                                \"name\": \"string\",\r\n                                \"defaultQuantity\": \"integer\",\r\n                                \"extraCost\": \"float\"\r\n                            }\r\n                        ],\r\n                        \"price\": \"float\"\r\n                    },\r\n                    \"cartId\": \"integer\",\r\n                    \"cart\": \"object\",\r\n                    \"modifiedIngredients\": [\r\n                        {\r\n                            \"name\": \"string\",\r\n                            \"quantity\": \"integer\"\r\n                        }\r\n                    ],\r\n                    \"totalPrice\": \"float\"\r\n                }\r\n            ],\r\n            \"userId\": \"integer\",\r\n            \"user\": \"object\",\r\n            \"status\": \"string\"\r\n        }\r\n    ],\r\n    \"points\": \"integer\",\r\n    \"role\": \"string\"\r\n}\r\n"
+          headers: {}
+      security: []
+    put:
+      summary: Invalid fields (400)
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                Points:
+                  type: integer
+                Role:
+                  type: string
+                UserLogin:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Username:
+                      type: string
+                    Password:
+                      type: string
+                    Token:
+                      type: string
+                  required:
+                    - Id
+                    - Username
+                    - Password
+                    - Token
+                Carts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: integer
+                      Name:
+                        type: string
+                      IsSelected:
+                        type: boolean
+                      UserId:
+                        type: integer
+                      User:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          Role:
+                            type: string
+                          Carts:
+                            type: array
+                            items:
+                              type: string
+                          UserLogin:
+                            type: object
+                            properties:
+                              Id:
+                                type: integer
+                              Username:
+                                type: string
+                              Password:
+                                type: string
+                              Token:
+                                type: string
+                            required:
+                              - Id
+                              - Username
+                              - Password
+                              - Token
+                        required:
+                          - Id
+                          - Name
+                          - Role
+                          - Carts
+                          - UserLogin
+                      Status:
+                        type: string
+                      CartItems:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            Id:
+                              type: integer
+                            Count:
+                              type: integer
+                            ItemId:
+                              type: integer
+                            Item:
+                              type: object
+                              properties:
+                                Id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                CategoryId:
+                                  type: integer
+                                Category:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                  required:
+                                    - Id
+                                    - Name
+                                Ingredients:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      Id:
+                                        type: integer
+                                      Name:
+                                        type: string
+                                      DefaultQuantity:
+                                        type: integer
+                                      ExtraCost:
+                                        type: integer
+                                    required:
+                                      - Id
+                                      - Name
+                                      - DefaultQuantity
+                                      - ExtraCost
+                                IngredientNames:
+                                  type: array
+                                  items:
+                                    type: string
+                                Price:
+                                  type: number
+                              required:
+                                - Id
+                                - Name
+                                - CategoryId
+                                - Category
+                                - Ingredients
+                                - IngredientNames
+                                - Price
+                            CartId:
+                              type: integer
+                            Cart:
+                              type: object
+                              properties:
+                                _id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                UserId:
+                                  type: integer
+                                User:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                    Role:
+                                      type: string
+                                    Carts:
+                                      type: array
+                                      items:
+                                        type: string
+                                    UserLogin:
+                                      type: object
+                                      properties:
+                                        Id:
+                                          type: integer
+                                        Username:
+                                          type: string
+                                        Password:
+                                          type: string
+                                        Token:
+                                          type: string
+                                      required:
+                                        - Id
+                                        - Username
+                                        - Password
+                                        - Token
+                                  required:
+                                    - Id
+                                    - Name
+                                    - Role
+                                    - Carts
+                                    - UserLogin
+                                Status:
+                                  type: string
+                                CartItems:
+                                  type: array
+                                  items:
+                                    type: string
+                              required:
+                                - _id
+                                - Name
+                                - UserId
+                                - User
+                                - Status
+                                - CartItems
+                            TotalPrice:
+                              type: integer
+                            ModifiedIngredients:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  Name:
+                                    type: string
+                                  Quantity:
+                                    type: integer
+              required:
+                - Name
+                - Points
+                - Role
+                - UserLogin
+                - Carts
+            example:
+              Name: Domas12
+              Points: 0
+              Role: Member
+              UserLogin:
+                Id: 1
+                Username: Domas
+                Password: password123
+                Token: abcd1234
+              Carts:
+                - _id: 1
+                  Name: Domas's Cart
+                  IsSelected: true
+                  UserId: 1
+                  User:
+                    Id: 1
+                    Name: Domas12
+                    Role: Member
+                    Carts: []
+                    UserLogin:
+                      Id: 1
+                      Username: Domas12
+                      Password: password123
+                      Token: abcd1234
+                  Status: Active
+                  CartItems:
+                    - Id: 1
+                      Count: 2
+                      ItemId: 1
+                      Item:
+                        Id: 1
+                        Name: Latte
+                        CategoryId: 1
+                        Category:
+                          Id: 1
+                          Name: Kava
+                        Ingredients:
+                          - Id: 1
+                            Name: Pienas
+                            DefaultQuantity: 1
+                            ExtraCost: 0
+                          - Id: 2
+                            Name: Espresso
+                            DefaultQuantity: 1
+                            ExtraCost: 1
+                        IngredientNames:
+                          - Pienas
+                          - Espresso
+                        Price: 4.5
+                      CartId: 1
+                      Cart:
+                        _id: 1
+                        Name: Domas's Cart
+                        UserId: 1
+                        User:
+                          Id: 1
+                          Name: Domas
+                          Role: Member
+                          Carts: []
+                          UserLogin:
+                            Id: 1
+                            Username: Domas
+                            Password: password123
+                            Token: abcd1234
+                        Status: Active
+                        CartItems: []
+                      TotalPrice: 11
+                      ModifiedIngredients:
+                        - Name: Espresso
+                          Quantity: 2
+      responses:
+        '400':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '1':
+                  summary: Invalid fields (400)
+                  value: "[\r\n    {\r\n        \"propertyName\": \"Name\",\r\n        \"errorMessage\": \"Name must consist of only English and Lithuanian letters and can contain two words.\",\r\n        \"attemptedValue\": {Name},\r\n        \"customState\": null,\r\n        \"severity\": 0,\r\n        \"errorCode\": \"RegularExpressionValidator\",\r\n        \"formattedMessagePlaceholderValues\": {\r\n            \"RegularExpression\": \"^[a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\\\\s]+$\",\r\n            \"PropertyName\": \"Name\",\r\n            \"PropertyValue\": \"{Name}\"\r\n        }\r\n    }\r\n]"
+          headers: {}
+      security: []
+  /api/User/10:
+    get:
+      summary: User not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters:
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: User not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"User with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+    delete:
+      summary: User not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: User not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"User with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/User/5:
+    put:
+      summary: User not found (404)
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                Points:
+                  type: integer
+                Role:
+                  type: string
+                UserLogin:
+                  type: object
+                  properties:
+                    Id:
+                      type: integer
+                    Username:
+                      type: string
+                    Password:
+                      type: string
+                    Token:
+                      type: string
+                  required:
+                    - Id
+                    - Username
+                    - Password
+                    - Token
+                Carts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: integer
+                      Name:
+                        type: string
+                      IsSelected:
+                        type: boolean
+                      UserId:
+                        type: integer
+                      User:
+                        type: object
+                        properties:
+                          Id:
+                            type: integer
+                          Name:
+                            type: string
+                          Role:
+                            type: string
+                          Carts:
+                            type: array
+                            items:
+                              type: string
+                          UserLogin:
+                            type: object
+                            properties:
+                              Id:
+                                type: integer
+                              Username:
+                                type: string
+                              Password:
+                                type: string
+                              Token:
+                                type: string
+                            required:
+                              - Id
+                              - Username
+                              - Password
+                              - Token
+                        required:
+                          - Id
+                          - Name
+                          - Role
+                          - Carts
+                          - UserLogin
+                      Status:
+                        type: string
+                      CartItems:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            Id:
+                              type: integer
+                            Count:
+                              type: integer
+                            ItemId:
+                              type: integer
+                            Item:
+                              type: object
+                              properties:
+                                Id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                CategoryId:
+                                  type: integer
+                                Category:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                  required:
+                                    - Id
+                                    - Name
+                                Ingredients:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      Id:
+                                        type: integer
+                                      Name:
+                                        type: string
+                                      DefaultQuantity:
+                                        type: integer
+                                      ExtraCost:
+                                        type: integer
+                                    required:
+                                      - Id
+                                      - Name
+                                      - DefaultQuantity
+                                      - ExtraCost
+                                IngredientNames:
+                                  type: array
+                                  items:
+                                    type: string
+                                Price:
+                                  type: number
+                              required:
+                                - Id
+                                - Name
+                                - CategoryId
+                                - Category
+                                - Ingredients
+                                - IngredientNames
+                                - Price
+                            CartId:
+                              type: integer
+                            Cart:
+                              type: object
+                              properties:
+                                _id:
+                                  type: integer
+                                Name:
+                                  type: string
+                                UserId:
+                                  type: integer
+                                User:
+                                  type: object
+                                  properties:
+                                    Id:
+                                      type: integer
+                                    Name:
+                                      type: string
+                                    Role:
+                                      type: string
+                                    Carts:
+                                      type: array
+                                      items:
+                                        type: string
+                                    UserLogin:
+                                      type: object
+                                      properties:
+                                        Id:
+                                          type: integer
+                                        Username:
+                                          type: string
+                                        Password:
+                                          type: string
+                                        Token:
+                                          type: string
+                                      required:
+                                        - Id
+                                        - Username
+                                        - Password
+                                        - Token
+                                  required:
+                                    - Id
+                                    - Name
+                                    - Role
+                                    - Carts
+                                    - UserLogin
+                                Status:
+                                  type: string
+                                CartItems:
+                                  type: array
+                                  items:
+                                    type: string
+                              required:
+                                - _id
+                                - Name
+                                - UserId
+                                - User
+                                - Status
+                                - CartItems
+                            TotalPrice:
+                              type: integer
+                            ModifiedIngredients:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  Name:
+                                    type: string
+                                  Quantity:
+                                    type: integer
+              required:
+                - Name
+                - Points
+                - Role
+                - UserLogin
+                - Carts
+            example:
+              Name: Domas
+              Points: 0
+              Role: Member
+              UserLogin:
+                Id: 1
+                Username: Domas
+                Password: password123
+                Token: abcd1234
+              Carts:
+                - _id: 1
+                  Name: Domas's Cart
+                  IsSelected: true
+                  UserId: 1
+                  User:
+                    Id: 1
+                    Name: Domas12
+                    Role: Member
+                    Carts: []
+                    UserLogin:
+                      Id: 1
+                      Username: Domas12
+                      Password: password123
+                      Token: abcd1234
+                  Status: Active
+                  CartItems:
+                    - Id: 1
+                      Count: 2
+                      ItemId: 1
+                      Item:
+                        Id: 1
+                        Name: Latte
+                        CategoryId: 1
+                        Category:
+                          Id: 1
+                          Name: Kava
+                        Ingredients:
+                          - Id: 1
+                            Name: Pienas
+                            DefaultQuantity: 1
+                            ExtraCost: 0
+                          - Id: 2
+                            Name: Espresso
+                            DefaultQuantity: 1
+                            ExtraCost: 1
+                        IngredientNames:
+                          - Pienas
+                          - Espresso
+                        Price: 4.5
+                      CartId: 1
+                      Cart:
+                        _id: 1
+                        Name: Domas's Cart
+                        UserId: 1
+                        User:
+                          Id: 1
+                          Name: Domas
+                          Role: Member
+                          Carts: []
+                          UserLogin:
+                            Id: 1
+                            Username: Domas
+                            Password: password123
+                            Token: abcd1234
+                        Status: Active
+                        CartItems: []
+                      TotalPrice: 11
+                      ModifiedIngredients:
+                        - Name: Espresso
+                          Quantity: 2
+      responses:
+        '404':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  status:
+                    type: integer
+                  detail:
+                    type: string
+                required:
+                  - title
+                  - status
+                  - detail
+              examples:
+                '1':
+                  summary: User not found (404)
+                  value: "{\r\n    \"title\": \"Not Found\",\r\n    \"status\": 404,\r\n    \"detail\": \"User with id:{id} not found.\"\r\n}"
+          headers: {}
+      security: []
+  /api/User/3:
+    delete:
+      summary: Delete user by ID
+      deprecated: false
+      description: ''
+      tags:
+        - api/User
+      parameters: []
+      responses:
+        '204':
+          description: ''
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
