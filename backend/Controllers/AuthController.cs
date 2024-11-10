@@ -11,6 +11,9 @@ using Brewtiful.Models;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Cors;
+using System.Runtime.InteropServices;
+
 
 [Route("api/auth")]
 [ApiController]
@@ -31,35 +34,66 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        if (registerDto == null || string.IsNullOrEmpty(registerDto.Email) || string.IsNullOrEmpty(registerDto.Password))
+        try
         {
-            return BadRequest(new { message = "Email and password are required." });
+            Console.WriteLine("registerDto Email: " + registerDto.Email);
+            Console.WriteLine("registerDto Password: " + registerDto.Password);
+            Console.WriteLine("registerDto Role: " + registerDto.Role);
+            Console.WriteLine("registerDto Name: " + registerDto.Name);
+            Console.WriteLine("registerDto Username: " + registerDto.Username);
+
+
+            if (registerDto == null || string.IsNullOrEmpty(registerDto.Email) || string.IsNullOrEmpty(registerDto.Password))
+            {
+                return BadRequest(new { message = "Email and password are required." });
+            }
+
+            var existingUser = await _users.Find(u => u.Email == registerDto.Email).FirstOrDefaultAsync();
+            if (existingUser != null)
+            {
+                return BadRequest(new { message = "User already exists." });
+            }
+
+            var role = string.IsNullOrEmpty(registerDto.Role) ? "User" : registerDto.Role;
+            Console.WriteLine("Assigned role: " + role);
+            if (role != "User" && role != "Admin")
+            {
+                return BadRequest(new { message = "Invalid role. Only 'User' and 'Admin' are allowed." });
+            }
+
+            var user = new User
+            {
+                Email = registerDto.Email,
+                Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                Role = role,
+                Name = registerDto.Name,
+                Username = registerDto.Username,
+                RefreshTokens = new List<RefreshToken>()
+            };
+
+            await _users.InsertOneAsync(user);
+            user = await _users.Find(u => u.Email == registerDto.Email).FirstOrDefaultAsync();
+            // Check if user.Id is now populated
+            if (user.Id == null)
+            {
+                return StatusCode(500, new { message = "Failed to generate user ID." });
+            }
+
+            var accessToken = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken(user);
+            user.RefreshTokens.Add(refreshToken);
+
+
+
+            //SetRefreshTokenCookie(refreshToken);
+            return Ok(new { token = accessToken });
         }
-
-        var existingUser = await _users.Find(u => u.Email == registerDto.Email).FirstOrDefaultAsync();
-        if (existingUser != null)
+        catch (Exception ex)
         {
-            return BadRequest(new { message = "User already exists." });
+            // Log or output the exception details for debugging
+            Console.WriteLine($"Exception: {ex.Message}");
+            return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
         }
-
-        var user = new User
-        {
-            Email = registerDto.Email,
-            Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
-            Role = "User",
-            Name = registerDto.Name,
-            Username = registerDto.Username,
-            RefreshTokens = new List<RefreshToken>()
-        };
-
-        var accessToken = GenerateJwtToken(user);
-        var refreshToken = GenerateRefreshToken(user);
-        user.RefreshTokens.Add(refreshToken);
-
-        await _users.InsertOneAsync(user);
-
-        SetRefreshTokenCookie(refreshToken);
-        return Ok(new { token = accessToken });
     }
 
     [HttpPost("login")]
@@ -179,6 +213,11 @@ public class AuthController : ControllerBase
 
     private string GenerateJwtToken(User user, bool isRefreshToken = false)
     {
+        Console.WriteLine("User Id: " + user.Id);
+        Console.WriteLine("User Email: " + user.Email);
+        Console.WriteLine("User Role: " + user.Role);
+
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),

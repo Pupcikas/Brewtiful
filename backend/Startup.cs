@@ -40,7 +40,6 @@ namespace Brewtiful
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());
-
             });
 
             // Enable controller services
