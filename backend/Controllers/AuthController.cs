@@ -53,7 +53,7 @@ public class AuthController : ControllerBase
         };
 
         var accessToken = GenerateJwtToken(user);
-        var refreshToken = GenerateRefreshToken();
+        var refreshToken = GenerateRefreshToken(user);
         user.RefreshTokens.Add(refreshToken);
 
         await _users.InsertOneAsync(user);
@@ -76,7 +76,7 @@ public class AuthController : ControllerBase
         var validRefreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Expires > DateTime.UtcNow && !rt.IsUsed);
         if (validRefreshToken == null)
         {
-            var newRefreshToken = GenerateRefreshToken();
+            var newRefreshToken = GenerateRefreshToken(user);
             user.RefreshTokens.Add(newRefreshToken);
             SetRefreshTokenCookie(newRefreshToken);
         }
@@ -102,23 +102,27 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Refresh token is missing." });
         }
 
-        var user = await _users.Find(u => u.RefreshTokens.Any()).FirstOrDefaultAsync();
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(refreshTokenValue);
+        var id = token.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
+
+        if (string.IsNullOrEmpty(id))
+        {
+            Console.WriteLine($"Invalid refresh token: ID claim missing or empty. Token value: {refreshTokenValue}");
+            return Unauthorized(new { message = "Invalid refresh token." });
+        }
+
+        var user = await _users.Find(u => u.Id == id).FirstOrDefaultAsync();
         if (user == null)
         {
-            Console.WriteLine("No user found with a refresh token.");
+            Console.WriteLine("No user found with this ID.");
             return Unauthorized(new { message = "Invalid refresh token." });
         }
 
-        var refreshToken = user.RefreshTokens.FirstOrDefault(rt => BCrypt.Net.BCrypt.Verify(refreshTokenValue, rt.Token));
-        if (refreshToken == null)
+        var refreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == refreshTokenValue);
+        if (refreshToken == null || refreshToken.Expires <= DateTime.UtcNow || refreshToken.IsRevoked || refreshToken.IsUsed)
         {
-            Console.WriteLine("Refresh token did not match any stored tokens.");
-            return Unauthorized(new { message = "Invalid refresh token." });
-        }
-
-        if (refreshToken.Expires <= DateTime.UtcNow || refreshToken.IsRevoked || refreshToken.IsUsed)
-        {
-            Console.WriteLine("Refresh token expired, revoked, or already used.");
+            Console.WriteLine("Refresh token invalid or already used.");
             return Unauthorized(new { message = "Refresh token has expired or is no longer valid." });
         }
 
@@ -126,7 +130,7 @@ public class AuthController : ControllerBase
         user.RefreshTokens.RemoveAll(rt => rt.Expires <= DateTime.UtcNow || rt.IsUsed);
 
         var newAccessToken = GenerateJwtToken(user);
-        var newRefreshToken = GenerateRefreshToken();
+        var newRefreshToken = GenerateRefreshToken(user);
 
         user.RefreshTokens.Add(newRefreshToken);
         await _users.ReplaceOneAsync(u => u.Id == user.Id, user);
@@ -135,8 +139,6 @@ public class AuthController : ControllerBase
         Console.WriteLine("New access token generated and returned.");
         return Ok(new { token = newAccessToken });
     }
-
-
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
@@ -175,7 +177,7 @@ public class AuthController : ControllerBase
     }
 
 
-    private string GenerateJwtToken(User user)
+    private string GenerateJwtToken(User user, bool isRefreshToken = false)
     {
         var claims = new[]
         {
@@ -185,6 +187,8 @@ public class AuthController : ControllerBase
             new Claim("role", user.Role)
         };
 
+        var expiryDuration = isRefreshToken ? 7 : 2;
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -192,28 +196,22 @@ public class AuthController : ControllerBase
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddDays(isRefreshToken ? 7 : 0).AddMinutes(isRefreshToken ? 0 : 2),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-    private RefreshToken GenerateRefreshToken()
+    private RefreshToken GenerateRefreshToken(User user)
     {
-        var randomNumber = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
+        var token = GenerateJwtToken(user, true);
+        return new RefreshToken
         {
-            rng.GetBytes(randomNumber);
-            var token = Convert.ToBase64String(randomNumber);
-            return new RefreshToken
-            {
-                Token = BCrypt.Net.BCrypt.HashPassword(token),
-                Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow,
-                IsRevoked = false,
-                IsUsed = false
-            };
-        }
+            Token = token,
+            Expires = DateTime.UtcNow.AddDays(7),
+            Created = DateTime.UtcNow,
+            IsRevoked = false,
+            IsUsed = false
+        };
     }
 
     private void SetRefreshTokenCookie(RefreshToken refreshToken)
@@ -222,11 +220,12 @@ public class AuthController : ControllerBase
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = refreshToken.Expires
         };
         Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
     }
+
     [HttpGet("profile")]
     [Authorize]
     public async Task<IActionResult> GetProfile()

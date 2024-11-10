@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
+import monitorToken from "./monitorToken";
 
 function Profile() {
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
+    monitorToken();
     const fetchProfile = async () => {
       try {
         const { data } = await api.get("/auth/profile", {

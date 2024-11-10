@@ -20,7 +20,7 @@ function Login({ setIsAuthenticated }) {
       localStorage.setItem("token", response.data.token);
       setIsAuthenticated(true);
       setMessage("Login successful");
-      navigate("/profile");
+      navigate("/");
     } catch (error) {
       if (error.response) {
         console.log("Error Response Data:", error.response.data);

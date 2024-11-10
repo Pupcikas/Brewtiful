@@ -42,6 +42,10 @@ namespace Brewtiful
                 .AllowCredentials());
 
             });
+
+            // Enable controller services
+            services.AddControllers();
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -89,8 +93,6 @@ namespace Brewtiful
                 return client.GetDatabase(databaseName);
             });
 
-            // Enable controller services
-            services.AddControllers();
 
             // Enable HTTP Context Access to use session in controllers
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

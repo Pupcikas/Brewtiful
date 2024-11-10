@@ -7,18 +7,20 @@ import About from "./pages/About";
 import Right from "./pages/Right";
 import logo from "./components/logo.png";
 import background from "./components/background.png";
+import monitorToken from "./pages/monitorToken";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    monitorToken();
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
   }, []);
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
+      await fetch("api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
