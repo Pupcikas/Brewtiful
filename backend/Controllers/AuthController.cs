@@ -83,10 +83,8 @@ public class AuthController : ControllerBase
             var refreshToken = GenerateRefreshToken(user);
             user.RefreshTokens.Add(refreshToken);
 
-
-
             //SetRefreshTokenCookie(refreshToken);
-            return Ok(new { token = accessToken });
+            return Ok(new { user });
         }
         catch (Exception ex)
         {
