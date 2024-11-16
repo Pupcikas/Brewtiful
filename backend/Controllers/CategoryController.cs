@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using Microsoft.AspNetCore.Authorization;
+
 using Brewtiful.Models;
 
 namespace Brewtiful.Controllers
@@ -17,16 +19,19 @@ namespace Brewtiful.Controllers
         private readonly IMongoCollection<Category> _categories;
         private readonly IMongoCollection<Ingredient> _ingredients;
         private readonly IMongoCollection<Item> _items;
+        private readonly ILogger<CategoryController> _logger;
 
-        public CategoryController(IMongoDatabase database)
+        public CategoryController(IMongoDatabase database, ILogger<CategoryController> logger)
         {
             _database = database;
             _categories = database.GetCollection<Category>("Categories");
             _ingredients = database.GetCollection<Ingredient>("Ingredients");
             _items = database.GetCollection<Item>("Items");
+            _logger = logger;
         }
 
         // GET: api/Category
+        [Authorize(Roles = "Admin,User")]
         [HttpGet]
         public ActionResult<List<Category>> Get()
         {
@@ -34,6 +39,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Category/{id}
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public ActionResult<Category> Get(int id)
         {
@@ -50,53 +56,75 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Category
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Category> Post([FromBody] Category category)
         {
-            if (category == null || string.IsNullOrWhiteSpace(category.Name))
+            try
             {
-                return BadRequest(new ProblemDetails
+                if (category == null || string.IsNullOrWhiteSpace(category.Name))
                 {
-                    Status = 400,
-                    Title = "Bad Request",
-                    Detail = "Invalid category or missing data."
+                    return BadRequest(new ProblemDetails
+                    {
+                        Status = 400,
+                        Title = "Bad Request",
+                        Detail = "Invalid category or missing data."
+                    });
+                }
+
+                // Use MongoDB filter builder for compatibility
+                var filter = Builders<Category>.Filter.Eq(c => c.Name, category.Name);
+                var existingCategoryByName = _categories.Find(filter).FirstOrDefault();
+
+                if (existingCategoryByName != null)
+                {
+                    return BadRequest(new ProblemDetails
+                    {
+                        Status = 400,
+                        Title = "Bad Request",
+                        Detail = $"A category with the name '{category.Name}' already exists."
+                    });
+                }
+
+                // Generate a new unique ID (consider using MongoDB's ObjectId)
+                var allCategories = _categories.Find(FilterDefinition<Category>.Empty).ToList();
+                int maxId = allCategories.Any() ? allCategories.Max(c => c.Id) : 0;
+                category.Id = maxId + 1;
+
+                if (!IsValidCategoryName(category.Name))
+                {
+                    return BadRequest(new ProblemDetails
+                    {
+                        Status = 400,
+                        Title = "Bad Request",
+                        Detail = "Category name must consist of only letters and be a maximum of 20 characters."
+                    });
+                }
+
+                _categories.InsertOne(category);
+                return CreatedAtAction(nameof(Get), new { id = category.Id }, category);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (ensure _logger is initialized)
+                _logger.LogError(ex, "An error occurred while creating the category.");
+
+                // Return a generic 500 error response
+                return StatusCode(500, new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Internal Server Error",
+                    Detail = "An unexpected error occurred while processing your request."
                 });
             }
-
-            var existingCategoryByName = _categories.Find(c => c.Name.Equals(category.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
-            if (existingCategoryByName != null)
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Bad Request",
-                    Detail = $"A category with the name '{category.Name}' already exists."
-                });
-            }
-
-            var allCategories = _categories.Find(FilterDefinition<Category>.Empty).ToList();
-            var categoryIds = allCategories.Select(c => c.Id).OrderByDescending(id => id).ToList();
-            int maxId = categoryIds.FirstOrDefault();
-            category.Id = maxId + 1;
-
-            if (!IsValidCategoryName(category.Name))
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Bad Request",
-                    Detail = "Category name must consist of only letters and be a maximum of 20 characters."
-                });
-            }
-
-            _categories.InsertOne(category);
-            return CreatedAtAction(nameof(Get), new { id = category.Id }, category);
         }
 
 
 
 
+
         // PUT: api/Category/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Category updatedCategory)
         {
@@ -178,6 +206,7 @@ namespace Brewtiful.Controllers
 
 
         // DELETE: api/Category/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -243,6 +272,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Category/FullHierarchy
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("FullHierarchy")]
         public ActionResult<List<Category>> GetFullHierarchy()
         {
@@ -271,6 +301,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Category/{categoryId}/Item/{itemId}/FullHierarchy
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{categoryId}/Item/{itemId}/FullHierarchy")]
         public ActionResult<Item> GetItemHierarchy(int categoryId, int itemId)
         {
@@ -302,6 +333,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Category/{categoryId}/Item/{itemId}/Ingredient/{ingredientId}
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{categoryId}/Item/{itemId}/Ingredient/{ingredientId}")]
         public ActionResult<Ingredient> GetIngredientHierarchy(int categoryId, int itemId, int ingredientId)
         {

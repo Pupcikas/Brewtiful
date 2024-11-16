@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Brewtiful.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Brewtiful.Controllers
 {
@@ -27,6 +28,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Item
+        [Authorize(Roles = "Admin,User")]
         [HttpGet]
         public ActionResult<List<Item>> Get()
         {
@@ -39,6 +41,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Item/{id}
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public ActionResult<Item> Get(int id)
         {
@@ -57,6 +60,7 @@ namespace Brewtiful.Controllers
 
 
         // GET: api/Category/{categoryId}/Items
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("category/{categoryId}")]
         public ActionResult<List<Item>> GetByCategory(int categoryId)
         {
@@ -68,6 +72,7 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Item
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Item> Post([FromBody] Item item)
         {
@@ -98,6 +103,7 @@ namespace Brewtiful.Controllers
         }
 
         // PUT: api/Item/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Item item)
         {
@@ -206,6 +212,7 @@ namespace Brewtiful.Controllers
         }
 
         // DELETE: api/Item/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

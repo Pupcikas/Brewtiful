@@ -29,6 +29,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Cart
+        [Authorize(Roles = "User")]
         [HttpGet]
         public ActionResult<List<Cart>> Get()
         {
@@ -36,6 +37,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Cart/{id}
+        [Authorize(Roles = "User")]
         [HttpGet("{id}")]
         public ActionResult<Cart> Get(int id)
         {
@@ -51,6 +53,7 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Cart
+        [Authorize(Roles = "User")]
         [HttpPost]
         public ActionResult<Cart> Post([FromBody] Cart cart)
         {
@@ -88,6 +91,7 @@ namespace Brewtiful.Controllers
         }
 
         // PUT: api/Cart/{id}
+        [Authorize(Roles = "User")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Cart cart)
         {
@@ -127,6 +131,7 @@ namespace Brewtiful.Controllers
         }
 
         // DELETE: api/Cart/{id}
+        [Authorize(Roles = "User")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -143,6 +148,7 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Cart/AddCustomItem
+        [Authorize(Roles = "User")]
         [HttpPost("addcustomitem")]
         public ActionResult AddCustomItem([FromBody] AddCustomItemRequest request)
         {

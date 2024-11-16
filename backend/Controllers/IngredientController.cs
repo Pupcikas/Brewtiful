@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Brewtiful.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Brewtiful.Controllers
 {
@@ -24,6 +25,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Ingredient
+        [Authorize(Roles = "Admin,User")]
         [HttpGet]
         public ActionResult<List<Ingredient>> Get()
         {
@@ -31,6 +33,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Ingredient/{id}
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public ActionResult<Ingredient> Get(int id)
         {
@@ -46,6 +49,7 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Ingredient
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Ingredient> Post([FromBody] Ingredient ingredient)
         {
@@ -71,6 +75,7 @@ namespace Brewtiful.Controllers
         }
 
         // PUT: api/Ingredient/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Ingredient updatedIngredient)
         {
@@ -154,6 +159,7 @@ namespace Brewtiful.Controllers
         }
 
         // DELETE: api/Ingredient/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
