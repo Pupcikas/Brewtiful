@@ -144,10 +144,6 @@ namespace Brewtiful.Controllers
                 // Remove these items from any carts (if you have a Cart collection)
                 var itemIdsToDelete = itemsToDelete.Select(i => i.Id).ToList();
 
-                var cartsFilter = Builders<Cart>.Filter.ElemMatch(c => c.CartItems, ci => itemIdsToDelete.Contains(ci.ItemId));
-                var cartsUpdate = Builders<Cart>.Update.PullFilter(c => c.CartItems, ci => itemIdsToDelete.Contains(ci.ItemId));
-                _carts.UpdateMany(cartsFilter, cartsUpdate);
-
                 // Similarly, handle orders or other related collections if necessary
             }
 

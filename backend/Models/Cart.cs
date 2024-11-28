@@ -15,7 +15,6 @@ namespace Brewtiful.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public bool IsSelected { get; set; } = true;
-        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
         public string Status { get; set; } = "Active";
     }
 }
