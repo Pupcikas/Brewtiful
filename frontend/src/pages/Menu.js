@@ -1,3 +1,4 @@
+// src/components/Menu.js
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
 import monitorToken from "./monitorToken";
@@ -17,20 +18,21 @@ export default function Menu() {
 
     const fetchData = async () => {
       try {
-        const { data: profileData } = await api.get("/auth/profile", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setProfile(profileData);
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-        const { data: categoriesData } = await api.get("/Category", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setCategories(categoriesData);
+        const headers = { Authorization: `Bearer ${token}` };
 
-        const { data: itemsData } = await api.get("/Item", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setItems(itemsData);
+        const [profileResponse, categoriesResponse, itemsResponse] =
+          await Promise.all([
+            api.get("/auth/profile", { headers }),
+            api.get("/Category", { headers }),
+            api.get("/Item", { headers }),
+          ]);
+
+        setProfile(profileResponse.data);
+        setCategories(categoriesResponse.data);
+        setItems(itemsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -42,10 +44,16 @@ export default function Menu() {
   const handleAddToCart = async (item) => {
     setSelectedItem(item);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You need to be logged in to add items to the cart.");
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+
       const ingredientPromises = item.ingredientIds.map((id) =>
-        api.get(`/Ingredient/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        })
+        api.get(`/Ingredient/${id}`, { headers })
       );
       const ingredientResponses = await Promise.all(ingredientPromises);
       const ingredientData = ingredientResponses.map((res) => res.data);
@@ -85,8 +93,10 @@ export default function Menu() {
     return totalPrice.toFixed(2);
   };
 
-  const handleAddToOrder = () => {
-    addToCart(
+  const handleAddToOrder = async () => {
+    if (!selectedItem) return;
+
+    await addToCart(
       selectedItem,
       ingredientsInfo,
       ingredientQuantities,
@@ -166,7 +176,7 @@ export default function Menu() {
                 >
                   <div>
                     <strong>{ingredient.name}</strong> - ($
-                    {ingredient.extraCost} per extra)
+                    {ingredient.extraCost.toFixed(2)} per extra)
                   </div>
                   <div className="flex items-center">
                     <button

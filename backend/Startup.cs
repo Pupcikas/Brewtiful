@@ -8,7 +8,6 @@ using MongoDB.Driver;
 using Microsoft.AspNetCore.Http;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Brewtiful.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -97,7 +96,6 @@ namespace Brewtiful
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Register validators
-            services.AddValidatorsFromAssemblyContaining<CartValidator>();
             services.AddValidatorsFromAssemblyContaining<UserValidator>();
         }
 

@@ -55,6 +55,7 @@ function App() {
             <nav className="flex items-center gap-4 text-primary font-semibold mx-4">
               {isAuthenticated ? (
                 <>
+                  <Link to="/orders">Orders</Link>
                   <Link to="/profile">Profile</Link>
                   <button
                     onClick={handleLogout}

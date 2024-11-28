@@ -1,20 +1,32 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+// Models/Cart.cs
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
 
 namespace Brewtiful.Models
 {
+    public class CartItem
+    {
+        public int ItemId { get; set; }
+        public int Quantity { get; set; } = 1;
+        public Dictionary<int, int> IngredientQuantities { get; set; } = new Dictionary<int, int>();
+    }
+
     public class Cart
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-        public bool IsSelected { get; set; } = true;
-        public string Status { get; set; } = "Active";
+
+        public string UserId { get; set; }
+
+        public List<CartItem> Items { get; set; } = new List<CartItem>();
+
+        public string Status { get; set; } = "Active"; // Active, CheckedOut
+
+        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? CheckedOutAt { get; set; }
     }
 }
