@@ -14,7 +14,6 @@ namespace Brewtiful.Models
         public string Name { get; set; }
         public int DefaultQuantity { get; set; }
         public double ExtraCost { get; set; }
-
         public List<int> ItemIds { get; set; } = new List<int>();
     }
 }

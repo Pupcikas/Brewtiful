@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "4tu1SO+CRSq1dsI97nxwn+MBSmiNm0/RnaU8boDAnWc=",
+  "Hash": "PL+qKjNma2beL4jQ2znZRC5/oBdVBSIKtoDK1yqqMW4=",
   "Source": "Brewtiful",
   "BasePath": "_content/Brewtiful",
   "Mode": "Default",
@@ -15,5 +15,23 @@
       "Pattern": "**"
     }
   ],
-  "Assets": []
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
+      "SourceId": "Brewtiful",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "BasePath": "_content/Brewtiful",
+      "RelativePath": "images/items/d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png"
+    }
+  ]
 }

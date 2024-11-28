@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
+      "PackagePath": "staticwebassets\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Brewtiful.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.build.Brewtiful.props",
+      "PackagePath": "build\\Brewtiful.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildMultiTargeting.Brewtiful.props",
+      "PackagePath": "buildMultiTargeting\\Brewtiful.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildTransitive.Brewtiful.props",
+      "PackagePath": "buildTransitive\\Brewtiful.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
