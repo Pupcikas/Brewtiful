@@ -72,6 +72,7 @@ C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\appsetting
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\global.json
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\package-lock.json
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\package.json
+C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\Brewtiful.staticwebassets.runtime.json
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\Brewtiful.exe
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\Brewtiful.deps.json
 C:\Users\Domas\Desktop\5 semestras\Brewtiful\backend\bin\Debug\net7.0\Brewtiful.runtimeconfig.json

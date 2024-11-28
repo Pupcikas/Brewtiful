@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "ioR6cnF+f3l2GkQ1Pe9UIdUrm2bL1KMoZfIEbLjTVGA=",
+  "Hash": "4tu1SO+CRSq1dsI97nxwn+MBSmiNm0/RnaU8boDAnWc=",
   "Source": "Brewtiful",
   "BasePath": "_content/Brewtiful",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "Brewtiful\\wwwroot",
+      "Source": "Brewtiful",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "BasePath": "_content/Brewtiful",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 public class AuthController : ControllerBase
 {
     private readonly IMongoCollection<User> _users;
+    private readonly IMongoCollection<Cart> _carts;
     private readonly IConfiguration _configuration;
     private readonly JwtSettings _jwtSettings;
 
@@ -27,6 +28,7 @@ public class AuthController : ControllerBase
     {
         var database = client.GetDatabase("Brewtiful");
         _users = database.GetCollection<User>("Users");
+        _carts = database.GetCollection<Cart>("Carts");
         _configuration = configuration;
         _jwtSettings = jwtSettings.Value;
     }
@@ -61,6 +63,10 @@ public class AuthController : ControllerBase
                 return BadRequest(new { message = "Invalid role. Only 'User' and 'Admin' are allowed." });
             }
 
+            var cart = new Cart
+            {
+            };
+            _carts.InsertOne(cart);
             var user = new User
             {
                 Email = registerDto.Email,
@@ -68,7 +74,8 @@ public class AuthController : ControllerBase
                 Role = role,
                 Name = registerDto.Name,
                 Username = registerDto.Username,
-                RefreshTokens = new List<RefreshToken>()
+                RefreshTokens = new List<RefreshToken>(),
+                CartId = cart.Id
             };
 
             await _users.InsertOneAsync(user);
@@ -97,31 +104,56 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var user = await _users.Find(u => u.Email == loginDto.Email).FirstOrDefaultAsync();
-        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+        try
         {
-            return Unauthorized(new { message = "Invalid email or password." });
+            var user = await _users.Find(u => u.Email == loginDto.Email).FirstOrDefaultAsync();
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid email or password." });
+            }
+
+            // Remove expired or used refresh tokens
+            user.RefreshTokens.RemoveAll(rt => rt.Expires <= DateTime.UtcNow || rt.IsUsed);
+
+            var validRefreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Expires > DateTime.UtcNow && !rt.IsUsed);
+            if (validRefreshToken == null)
+            {
+                var newRefreshToken = GenerateRefreshToken(user);
+                user.RefreshTokens.Add(newRefreshToken);
+                SetRefreshTokenCookie(newRefreshToken);
+            }
+            else
+            {
+                SetRefreshTokenCookie(validRefreshToken);
+            }
+
+            var accessToken = GenerateJwtToken(user);
+            await _users.ReplaceOneAsync(u => u.Id == user.Id, user);
+
+            return Ok(new { token = accessToken });
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(new { message = "Invalid input provided.", details = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = "An error occurred during the login process.",
+                exceptionType = ex.GetType().Name,
+                details = ex.Message,
+                stackTrace = ex.StackTrace
+            });
         }
 
-        user.RefreshTokens.RemoveAll(rt => rt.Expires <= DateTime.UtcNow || rt.IsUsed);
 
-        var validRefreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Expires > DateTime.UtcNow && !rt.IsUsed);
-        if (validRefreshToken == null)
-        {
-            var newRefreshToken = GenerateRefreshToken(user);
-            user.RefreshTokens.Add(newRefreshToken);
-            SetRefreshTokenCookie(newRefreshToken);
-        }
-        else
-        {
-            SetRefreshTokenCookie(validRefreshToken);
-        }
-
-        var accessToken = GenerateJwtToken(user);
-        await _users.ReplaceOneAsync(u => u.Id == user.Id, user);
-
-        return Ok(new { token = accessToken });
     }
+
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken()
@@ -264,7 +296,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("profile")]
-    [Authorize]
+    [Authorize(Roles = "Admin, User")]
     public async Task<IActionResult> GetProfile()
     {
         foreach (var claim in User.Claims)

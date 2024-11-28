@@ -34,7 +34,7 @@ namespace Brewtiful.Controllers
         // GET: api/CartItem/{id}
         [Authorize(Roles = "User")]
         [HttpGet("{id}")]
-        public ActionResult<CartItem> GetById(int id)
+        public ActionResult<CartItem> GetById(string id)
         {
             var cartItem = _cartItems.Find(c => c.Id == id).FirstOrDefault();
             if (cartItem == null)
@@ -77,7 +77,7 @@ namespace Brewtiful.Controllers
             }
 
             var cartsCollection = _database.GetCollection<Cart>("Carts");
-            var cart = cartsCollection.Find(c => c._id == cartItem.CartId).FirstOrDefault();
+            var cart = cartsCollection.Find(c => c.Id.Equals(cartItem.CartId)).FirstOrDefault();
             if (cart == null)
             {
                 return BadRequest(new ProblemDetails
@@ -117,7 +117,7 @@ namespace Brewtiful.Controllers
             _cartItems.InsertOne(cartItem);
 
             cart.CartItems.Add(cartItem);
-            cartsCollection.ReplaceOne(c => c._id == cart._id, cart);
+            cartsCollection.ReplaceOne(c => c.Id == cart.Id, cart);
 
             return CreatedAtAction(nameof(Get), new { id = cartItem.Id }, cartItem);
         }
@@ -126,7 +126,7 @@ namespace Brewtiful.Controllers
         // PUT: api/CartItem/{id}
         [Authorize(Roles = "User")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] CartItem updatedCartItem)
+        public IActionResult Put(string id, [FromBody] CartItem updatedCartItem)
         {
             if (updatedCartItem == null || updatedCartItem.Id != id)
             {
@@ -151,7 +151,7 @@ namespace Brewtiful.Controllers
             }
 
             var cartsCollection = _database.GetCollection<Cart>("Carts");
-            var cart = cartsCollection.Find(c => c._id == updatedCartItem.CartId).FirstOrDefault();
+            var cart = cartsCollection.Find(c => c.Id.Equals(updatedCartItem.CartId)).FirstOrDefault();
             if (cart == null)
             {
                 return NotFound(new ProblemDetails
@@ -221,7 +221,7 @@ namespace Brewtiful.Controllers
         // DELETE: api/CartItem/{id}
         [Authorize(Roles = "User")]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
             var result = _cartItems.DeleteOne(c => c.Id == id);
             if (result.DeletedCount == 0)

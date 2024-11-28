@@ -8,6 +8,12 @@ import Right from "./pages/Right";
 import logo from "./components/logo.png";
 import background from "./components/background.png";
 import monitorToken from "./pages/monitorToken";
+import Categories from "./pages/Categories";
+import Items from "./pages/Items";
+import Ingredients from "./pages/Ingredients";
+import Users from "./pages/Users";
+import Orders from "./pages/Orders";
+import Menu from "./pages/Menu";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -87,13 +93,14 @@ function App() {
           />
 
           <Route path="/about" element={<About />} />
+          <Route path="/menu" element={<Menu />} />
           <Route
             path="/login"
             element={<Login setIsAuthenticated={setIsAuthenticated} />}
           />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/profile"
+            path="/profile/*"
             element={
               isAuthenticated ? (
                 <Profile />
@@ -101,6 +108,76 @@ function App() {
                 <div>
                   <h1 className="font-bold text-red-700">
                     Please login to view your profile.
+                  </h1>
+                </div>
+              )
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              isAuthenticated ? (
+                <Categories />
+              ) : (
+                <div>
+                  <h1 className="font-bold text-red-700">
+                    You do not have permission to view this page.
+                  </h1>
+                </div>
+              )
+            }
+          />
+          <Route
+            path="/items"
+            element={
+              isAuthenticated ? (
+                <Items />
+              ) : (
+                <div>
+                  <h1 className="font-bold text-red-700">
+                    You do not have permission to view this page.
+                  </h1>
+                </div>
+              )
+            }
+          />
+          <Route
+            path="/ingredients"
+            element={
+              isAuthenticated ? (
+                <Ingredients />
+              ) : (
+                <div>
+                  <h1 className="font-bold text-red-700">
+                    You do not have permission to view this page.
+                  </h1>
+                </div>
+              )
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              isAuthenticated ? (
+                <Users />
+              ) : (
+                <div>
+                  <h1 className="font-bold text-red-700">
+                    You do not have permission to view this page.
+                  </h1>
+                </div>
+              )
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              isAuthenticated ? (
+                <Orders />
+              ) : (
+                <div>
+                  <h1 className="font-bold text-red-700">
+                    You do not have permission to view this page.
                   </h1>
                 </div>
               )

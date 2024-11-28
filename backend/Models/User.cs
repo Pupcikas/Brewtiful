@@ -23,18 +23,20 @@ namespace Brewtiful.Models
         public string Email { get; set; }
 
         [BsonElement("Password")]
+        [JsonIgnore]
         public string Password { get; set; }
 
-        public int Points { get; set; }
+        public int? Points { get; set; }
 
         [BsonElement("Role")]
         public string Role { get; set; } = "User";
 
-        [BsonElement("Carts")]
-        public Cart? Carts { get; set; } = new Cart();
+        [BsonElement("Cart")]
+        public string CartId { get; set; }
 
 
         [BsonElement("Token")]
+        [JsonIgnore]
         public string? Token { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }

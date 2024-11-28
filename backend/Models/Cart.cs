@@ -12,16 +12,10 @@ namespace Brewtiful.Models
     public class Cart
     {
         [BsonId]
-        public int _id { get; set; }
-        public string Name { get; set; }
-        public bool IsSelected { get; set; }
-
-        public List<CartItem> CartItems { get; set; }
-        public string UserId { get; set; }
-
-        [BsonIgnore]
-        public User User { get; set; }
-
-        public string Status { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public bool IsSelected { get; set; } = true;
+        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public string Status { get; set; } = "Active";
     }
 }

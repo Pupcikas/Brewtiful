@@ -15,16 +15,16 @@ namespace Brewtiful.Models
         [BsonId]
         public int Id { get; set; }
         public string Name { get; set; }
-
         public int CategoryId { get; set; }
 
         [BsonIgnore]
         public Category? Category { get; set; }
 
-        [BsonIgnore]
-        public List<string>? IngredientNames { get; set; }
+        public List<int> IngredientIds { get; set; } = new List<int>();
 
-        public List<Ingredient> Ingredients { get; set; }
+        public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
         public double Price { get; set; }
+
+        public string? PictureUrl { get; set; }
     }
 }

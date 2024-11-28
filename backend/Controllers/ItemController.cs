@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Brewtiful.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+
 
 namespace Brewtiful.Controllers
 {
@@ -39,6 +42,7 @@ namespace Brewtiful.Controllers
             }
             return items;
         }
+
 
         // GET: api/Item/{id}
         [Authorize(Roles = "Admin,User")]
@@ -74,49 +78,78 @@ namespace Brewtiful.Controllers
         // POST: api/Item
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public ActionResult<Item> Post([FromBody] Item item)
+        public async Task<ActionResult<Item>> Post([FromForm] ItemCreateDto itemDto)
         {
-            if (!ValidateItem(item, out var validationErrors))
+            if (!ValidateItemDto(itemDto, out var validationErrors))
             {
                 return BadRequest(new ProblemDetails
                 {
                     Status = 400,
-                    Title = "BadRequest",
+                    Title = "Bad Request",
                     Detail = string.Join(", ", validationErrors)
                 });
             }
 
-            var existingItem = _items.Find(i => i.Id == item.Id).FirstOrDefault();
-            if (existingItem != null)
+            if (!ValidateIngredientIds(itemDto.IngredientIds, out var ingredientErrors))
             {
-                validationErrors.Add($"An item with ID {item.Id} already exists.");
+                validationErrors.AddRange(ingredientErrors);
                 return BadRequest(new ProblemDetails
                 {
                     Status = 400,
-                    Title = "BadRequest",
+                    Title = "Bad Request",
                     Detail = string.Join(", ", validationErrors)
                 });
             }
 
-            _items.InsertOne(item);
-            return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
+            var newItem = new Item
+            {
+                Name = itemDto.Name,
+                CategoryId = itemDto.CategoryId,
+                Price = itemDto.Price,
+                IngredientIds = itemDto.IngredientIds
+            };
+            if (itemDto.Picture != null && itemDto.Picture.Length > 0)
+            {
+                // Save the picture
+                var fileName = $"{Guid.NewGuid()}_{itemDto.Picture.FileName}";
+                var filePath = Path.Combine("wwwroot/images/items", fileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await itemDto.Picture.CopyToAsync(stream);
+                }
+
+                // Set the PictureUrl
+                newItem.PictureUrl = $"/images/items/{fileName}";
+            }
+
+            _items.InsertOne(newItem);
+
+            UpdateIngredientItemIds(itemDto.IngredientIds, newItem.Id);
+
+            return CreatedAtAction(nameof(Get), new { id = newItem.Id }, newItem);
         }
+
 
         // PUT: api/Item/{id}
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Item item)
+        public async Task<IActionResult> Put(int id, [FromForm] ItemUpdateDto itemDto)
         {
             var existingItem = _items.Find(i => i.Id == id).FirstOrDefault();
             if (existingItem == null)
+            {
                 return NotFound(new ProblemDetails
                 {
                     Status = 404,
                     Title = "Not Found",
                     Detail = $"Item with id:{id} not found."
                 });
+            }
 
-            if (!ValidateItem(item, out var validationErrors))
+            if (!ValidateItemDto(itemDto, out var validationErrors))
             {
                 return BadRequest(new ProblemDetails
                 {
@@ -126,7 +159,7 @@ namespace Brewtiful.Controllers
                 });
             }
 
-            if (!ValidateIngredients(item.Ingredients, out var ingredientErrors))
+            if (!ValidateIngredientIds(itemDto.IngredientIds, out var ingredientErrors))
             {
                 validationErrors.AddRange(ingredientErrors);
                 return BadRequest(new ProblemDetails
@@ -137,17 +170,93 @@ namespace Brewtiful.Controllers
                 });
             }
 
-            existingItem.Name = item.Name;
-            existingItem.CategoryId = item.CategoryId;
-            existingItem.Ingredients = item.Ingredients;
-            existingItem.Price = item.Price;
+            existingItem.Name = itemDto.Name;
+            existingItem.CategoryId = itemDto.CategoryId;
+            existingItem.Price = itemDto.Price;
+            existingItem.IngredientIds = itemDto.IngredientIds;
+
+            if (itemDto.Picture != null && itemDto.Picture.Length > 0)
+            {
+                // Save the new picture
+                var fileName = $"{Guid.NewGuid()}_{itemDto.Picture.FileName}";
+                var filePath = Path.Combine("wwwroot/images/items", fileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await itemDto.Picture.CopyToAsync(stream);
+                }
+
+                // Optionally delete the old picture file if it exists
+
+                // Update the PictureUrl
+                existingItem.PictureUrl = $"/images/items/{fileName}";
+            }
 
             _items.ReplaceOne(i => i.Id == id, existingItem);
 
-            UpdateIngredientItemIds(item.Ingredients, existingItem.Id);
+            UpdateIngredientItemIds(itemDto.IngredientIds, existingItem.Id);
 
             return NoContent();
         }
+
+        private bool ValidateItemDto(IItemDto itemDto, out List<string> validationErrors)
+        {
+            validationErrors = new List<string>();
+
+            if (itemDto.Price <= 0)
+            {
+                validationErrors.Add("Price must be a positive number.");
+            }
+
+            var category = _categories.Find(c => c.Id == itemDto.CategoryId).FirstOrDefault();
+            if (category == null)
+            {
+                validationErrors.Add("The specified category does not exist.");
+            }
+
+            if (!IsValidName(itemDto.Name))
+            {
+                validationErrors.Add("Item name can only contain English and Lithuanian letters.");
+            }
+
+            return !validationErrors.Any();
+        }
+
+
+        private bool ValidateIngredientIds(List<int> ingredientIds, out List<string> validationErrors)
+        {
+            validationErrors = new List<string>();
+            foreach (var ingredientId in ingredientIds)
+            {
+                var existingIngredient = _ingredients.Find(i => i.Id == ingredientId).FirstOrDefault();
+                if (existingIngredient == null)
+                {
+                    validationErrors.Add($"Ingredient with ID {ingredientId} does not exist.");
+                }
+            }
+
+            return !validationErrors.Any();
+        }
+
+        private void UpdateIngredientItemIds(List<int> ingredientIds, int itemId)
+        {
+            foreach (var ingredientId in ingredientIds)
+            {
+                var existingIngredient = _ingredients.Find(i => i.Id == ingredientId).FirstOrDefault();
+                if (existingIngredient != null)
+                {
+                    if (!existingIngredient.ItemIds.Contains(itemId))
+                    {
+                        existingIngredient.ItemIds.Add(itemId);
+                        _ingredients.ReplaceOne(i => i.Id == existingIngredient.Id, existingIngredient);
+                    }
+                }
+            }
+        }
+
+
 
         private void UpdateIngredientItemIds(List<Ingredient> ingredients, int itemId)
         {
@@ -224,39 +333,18 @@ namespace Brewtiful.Controllers
                     Title = "Not Found",
                     Detail = $"Item with id:{id} not found."
                 });
-
-            var cartItemsCollection = _database.GetCollection<CartItem>("CartItems");
-
-            var cartItemFilter = Builders<CartItem>.Filter.Eq(ci => ci.ItemId, id);
-            var cartItemsToRemove = cartItemsCollection.Find(cartItemFilter).ToList();
-
-            foreach (var cartItem in cartItemsToRemove)
-            {
-                var cartsCollection = _database.GetCollection<Cart>("Carts");
-                var cartFilter = Builders<Cart>.Filter.Eq(c => c._id, cartItem.CartId);
-                var cart = cartsCollection.Find(cartFilter).FirstOrDefault();
-
-                if (cart != null)
-                {
-                    cart.CartItems.RemoveAll(ci => ci.Id == cartItem.Id);
-                    cartsCollection.ReplaceOne(c => c._id == cart._id, cart);
-                }
-
-                cartItemsCollection.DeleteOne(ci => ci.Id == cartItem.Id);
-            }
-
             return NoContent();
         }
 
         private void LoadIngredients(Item item)
         {
-            if (item.IngredientNames == null || item.IngredientNames.Count == 0)
+            if (item.IngredientIds == null || item.IngredientIds.Count == 0)
                 return;
 
-            var ingredientFilter = Builders<Ingredient>.Filter.In(i => i.Name, item.IngredientNames);
-            var ingredients = _ingredients.Find(ingredientFilter).ToList();
+            var ingredients = _ingredients.Find(i => item.IngredientIds.Contains(i.Id)).ToList();
 
             item.Ingredients = ingredients;
         }
+
     }
 }

@@ -11,7 +11,8 @@ namespace Brewtiful.Models
     public class CartItem
     {
         [BsonId]
-        public int Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public int Count { get; set; }
 
         public int ItemId { get; set; }

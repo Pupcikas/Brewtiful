@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Brewtiful.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Brewtiful.Controllers
 {
@@ -51,34 +48,41 @@ namespace Brewtiful.Controllers
         // POST: api/Ingredient
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public ActionResult<Ingredient> Post([FromBody] Ingredient ingredient)
+        public ActionResult<Ingredient> Post([FromBody] IngredientCreateDto ingredientDto)
         {
-            var validationResponse = ValidateIngredient(ingredient);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var validationResponse = ValidateIngredientDto(ingredientDto);
             if (validationResponse != null)
             {
                 return validationResponse; // Return the response from validation
             }
 
-            var existingIngredient = _ingredients.Find(i => i.Id == ingredient.Id).FirstOrDefault();
-            if (existingIngredient != null)
+            var newIngredient = new Ingredient
             {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Bad Request",
-                    Detail = $"Ingredient with id:{ingredient.Id} already exists."
-                });
-            }
+                Id = GenerateNewId(),
+                Name = ingredientDto.Name,
+                DefaultQuantity = ingredientDto.DefaultQuantity,
+                ExtraCost = ingredientDto.ExtraCost,
+            };
 
-            _ingredients.InsertOne(ingredient);
-            return CreatedAtAction(nameof(Get), new { id = ingredient.Id }, ingredient);
+            _ingredients.InsertOne(newIngredient);
+            return CreatedAtAction(nameof(Get), new { id = newIngredient.Id }, newIngredient);
         }
 
         // PUT: api/Ingredient/{id}
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Ingredient updatedIngredient)
+        public IActionResult Put(int id, [FromBody] IngredientUpdateDto updatedIngredientDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var existingIngredient = _ingredients.Find(i => i.Id == id).FirstOrDefault();
             if (existingIngredient == null)
                 return NotFound(new ProblemDetails
@@ -88,72 +92,20 @@ namespace Brewtiful.Controllers
                     Detail = $"Ingredient with id:{id} not found."
                 });
 
-            var validationResponse = ValidateIngredient(updatedIngredient);
+            var validationResponse = ValidateIngredientDto(updatedIngredientDto);
             if (validationResponse != null)
             {
                 return validationResponse; // Return the response from validation
             }
 
-            existingIngredient.Name = updatedIngredient.Name;
-            existingIngredient.DefaultQuantity = updatedIngredient.DefaultQuantity;
-            existingIngredient.ExtraCost = updatedIngredient.ExtraCost;
+            existingIngredient.Name = updatedIngredientDto.Name;
+            existingIngredient.DefaultQuantity = updatedIngredientDto.DefaultQuantity;
+            existingIngredient.ExtraCost = updatedIngredientDto.ExtraCost;
 
             _ingredients.ReplaceOne(i => i.Id == id, existingIngredient);
 
-            var itemsCollection = _database.GetCollection<Item>("Items");
-            var itemsToUpdate = itemsCollection.Find(i => i.Ingredients.Any(ing => ing.Id == id)).ToList();
-
-            foreach (var item in itemsToUpdate)
-            {
-                item.Ingredients = item.Ingredients.Select(ing =>
-                {
-                    if (ing.Id == id)
-                    {
-                        ing.Name = existingIngredient.Name;
-                        ing.DefaultQuantity = existingIngredient.DefaultQuantity;
-                        ing.ExtraCost = existingIngredient.ExtraCost;
-                    }
-                    return ing;
-                }).ToList();
-
-                itemsCollection.ReplaceOne(i => i.Id == item.Id, item);
-            }
-
-            var cartItemsCollection = _database.GetCollection<CartItem>("CartItems");
-            var cartItemsToUpdate = cartItemsCollection.Find(ci => ci.Item.Ingredients.Any(ing => ing.Id == id)).ToList();
-
-            foreach (var cartItem in cartItemsToUpdate)
-            {
-                cartItem.Item.Ingredients = cartItem.Item.Ingredients.Select(ing =>
-                {
-                    if (ing.Id == id)
-                    {
-                        ing.Name = existingIngredient.Name;
-                        ing.DefaultQuantity = existingIngredient.DefaultQuantity;
-                        ing.ExtraCost = existingIngredient.ExtraCost;
-                    }
-                    return ing;
-                }).ToList();
-
-                cartItemsCollection.ReplaceOne(ci => ci.Id == cartItem.Id, cartItem);
-            }
-
-            var cartsCollection = _database.GetCollection<Cart>("Carts");
-            var cartsToUpdate = cartsCollection.Find(c => c.CartItems.Any(ci => ci.ItemId == id)).ToList();
-
-            foreach (var cart in cartsToUpdate)
-            {
-                cart.CartItems = cart.CartItems.Select(ci =>
-                {
-                    if (ci.ItemId == id)
-                    {
-                        ci.Item = itemsCollection.Find(i => i.Id == ci.ItemId).FirstOrDefault();
-                    }
-                    return ci;
-                }).ToList();
-
-                cartsCollection.ReplaceOne(c => c._id == cart._id, cart);
-            }
+            // Update related items (if necessary)
+            // Implement logic to update items that use this ingredient, if required
 
             return NoContent();
         }
@@ -174,40 +126,54 @@ namespace Brewtiful.Controllers
             return NoContent();
         }
 
-        private ActionResult ValidateIngredient(Ingredient ingredient)
+        private ActionResult ValidateIngredientDto(IngredientCreateDto ingredientDto)
         {
-            if (string.IsNullOrWhiteSpace(ingredient.Name) || ingredient.Name.Length > 20 ||
-                !Regex.IsMatch(ingredient.Name, @"^[a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s]+$"))
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(ingredientDto.Name) || ingredientDto.Name.Length > 20 ||
+                !Regex.IsMatch(ingredientDto.Name, @"^[a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s]+$"))
             {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Validation Error",
-                    Detail = "Name must consist of only English or Lithuanian letters and spaces, and be a maximum of 20 characters long."
-                });
+                errors.Add("Name must consist of only English or Lithuanian letters and spaces, and be a maximum of 20 characters long.");
             }
 
-            if (ingredient.DefaultQuantity <= 0)
+            if (ingredientDto.DefaultQuantity <= 0)
             {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Validation Error",
-                    Detail = "Default Quantity must be a positive number."
-                });
+                errors.Add("Default Quantity must be a positive number.");
             }
 
-            if (ingredient.ExtraCost < 0)
+            if (ingredientDto.ExtraCost < 0)
+            {
+                errors.Add("Extra Cost must be 0 or a positive number.");
+            }
+
+            if (errors.Any())
             {
                 return BadRequest(new ProblemDetails
                 {
                     Status = 400,
                     Title = "Validation Error",
-                    Detail = "Extra Cost must be 0 or a positive number."
+                    Detail = string.Join(" ", errors)
                 });
             }
 
             return null; // No validation errors
+        }
+
+        private ActionResult ValidateIngredientDto(IngredientUpdateDto ingredientDto)
+        {
+            // Same validation as for create DTO
+            return ValidateIngredientDto(new IngredientCreateDto
+            {
+                Name = ingredientDto.Name,
+                DefaultQuantity = ingredientDto.DefaultQuantity,
+                ExtraCost = ingredientDto.ExtraCost
+            });
+        }
+
+        private int GenerateNewId()
+        {
+            var maxId = _ingredients.Find(ingredient => true).SortByDescending(ingredient => ingredient.Id).Limit(1).FirstOrDefault()?.Id ?? 0;
+            return maxId + 1;
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Cart
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public ActionResult<List<Cart>> Get()
         {
@@ -39,9 +39,9 @@ namespace Brewtiful.Controllers
         // GET: api/Cart/{id}
         [Authorize(Roles = "User")]
         [HttpGet("{id}")]
-        public ActionResult<Cart> Get(int id)
+        public ActionResult<Cart> Get(string id)
         {
-            var cart = _carts.Find(c => c._id == id).FirstOrDefault();
+            var cart = _carts.Find(c => c.Id == id).FirstOrDefault();
             if (cart == null)
                 return NotFound(new ProblemDetails
                 {
@@ -53,7 +53,7 @@ namespace Brewtiful.Controllers
         }
 
         // POST: api/Cart
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Cart> Post([FromBody] Cart cart)
         {
@@ -67,35 +67,16 @@ namespace Brewtiful.Controllers
                 });
             }
 
-            var user = _users.Find(u => u.Id.Equals(cart.UserId)).FirstOrDefault();
-            if (user == null)
-            {
-                return NotFound(new ProblemDetails
-                {
-                    Status = 404,
-                    Title = "Not Found",
-                    Detail = $"User associated with User ID {cart.UserId} not found."
-                });
-            }
-
-            _validator.ValidateUserName(cart, user.Name);
-            var validationResult = _validator.Validate(cart);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
             _carts.InsertOne(cart);
-            return CreatedAtAction(nameof(Get), new { id = cart._id }, cart);
+            return CreatedAtAction(nameof(Get), new { id = cart.Id }, cart);
         }
 
         // PUT: api/Cart/{id}
         [Authorize(Roles = "User")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Cart cart)
+        public IActionResult Put(string id, [FromBody] Cart cart)
         {
-            var existingCart = _carts.Find(c => c._id == id).FirstOrDefault();
+            var existingCart = _carts.Find(c => c.Id == id).FirstOrDefault();
             if (existingCart == null)
             {
                 return NotFound(new ProblemDetails
@@ -106,36 +87,17 @@ namespace Brewtiful.Controllers
                 });
             }
 
-            var user = _users.Find(u => u.Id.Equals(existingCart.UserId)).FirstOrDefault();
-            if (user == null)
-            {
-                return NotFound(new ProblemDetails
-                {
-                    Status = 404,
-                    Title = "Not Found",
-                    Detail = $"User associated with Cart ID {id} not found."
-                });
-            }
-
-            _validator.ValidateUserName(cart, user.Name);
-            var validationResult = _validator.Validate(cart);
-
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-            _carts.ReplaceOne(c => c._id == id, cart);
+            _carts.ReplaceOne(c => c.Id == id, cart);
 
             return Ok(cart);
         }
 
         // DELETE: api/Cart/{id}
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
-            var result = _carts.DeleteOne(c => c._id == id);
+            var result = _carts.DeleteOne(c => c.Id == id);
             if (result.DeletedCount == 0)
                 return NotFound(new ProblemDetails
                 {
@@ -145,47 +107,6 @@ namespace Brewtiful.Controllers
                 });
 
             return NoContent();
-        }
-
-        // POST: api/Cart/AddCustomItem
-        [Authorize(Roles = "User")]
-        [HttpPost("addcustomitem")]
-        public ActionResult AddCustomItem([FromBody] AddCustomItemRequest request)
-        {
-            var cart = _carts.Find(c => c._id == request.CartId).FirstOrDefault();
-            if (cart == null)
-                return NotFound(new { message = "Cart not found" });
-
-            var item = _items.Find(i => i.Id == request.ItemId).FirstOrDefault();
-            if (item == null)
-                return NotFound(new { message = "Item not found" });
-
-            double totalPrice = item.Price;
-
-            foreach (var modIngredient in request.ModifiedIngredients)
-            {
-                var baseIngredient = item.Ingredients.FirstOrDefault(i => i.Name == modIngredient.Name);
-                if (baseIngredient != null && modIngredient.Quantity > baseIngredient.DefaultQuantity)
-                {
-                    int extraQuantity = modIngredient.Quantity - baseIngredient.DefaultQuantity;
-                    totalPrice += extraQuantity * baseIngredient.ExtraCost;
-                }
-            }
-
-            var cartItem = new CartItem
-            {
-                ItemId = item.Id,
-                Item = item,
-                Count = request.Count,
-                ModifiedIngredients = request.ModifiedIngredients,
-                TotalPrice = totalPrice * request.Count
-            };
-
-            cart.CartItems.Add(cartItem);
-
-            _carts.ReplaceOne(c => c._id == cart._id, cart);
-
-            return Ok(new { message = "Item added to cart", totalPrice = cartItem.TotalPrice });
         }
     }
 
