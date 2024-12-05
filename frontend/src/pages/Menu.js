@@ -122,7 +122,7 @@ function Menu() {
 
   return (
     <section className="mt-8 max-w-7xl mx-auto p-4">
-      <h1 className="text-center text-primary text-4xl mb-6">Our Menu</h1>
+      <h1 className="text-center text-black text-4xl mb-6">Our Menu</h1>
       {items.length === 0 ? (
         <div className="text-center text-gray-700">No items available.</div>
       ) : (
