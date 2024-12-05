@@ -73,7 +73,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="flex flex-col min-h-screen font-sans">
+        <div className="flex flex-col min-h-screen font-recoleta">
           {/* Header */}
           <header className="bg-primary text-black shadow-lg">
             <div className="container mx-auto flex items-center justify-between p-4">
@@ -124,7 +124,7 @@ function App() {
                       className="flex items-center space-x-1 hover:text-secondary transition-colors duration-300"
                     >
                       <FaUser />
-                      <span>Profile</span>
+                      <span>Account</span>
                     </Link>
                     {userRole === "User" && (
                       <Link
@@ -218,7 +218,7 @@ function App() {
                           onClick={closeMenu}
                           className="hover:text-secondary transition-colors duration-300"
                         >
-                          Profile
+                          Account
                         </Link>
                       </li>
                       {userRole === "User" && (
@@ -391,7 +391,7 @@ function App() {
           <footer className="bg-primary text-black text-center py-4 shadow-inner">
             <div className="container mx-auto">
               <p className="text-sm">
-                © 2024 Brewtiful - Domas Gladkauskas IFK-2.
+                2024 Brewtiful - Domas Gladkauskas IFK-2.
               </p>
               {/* Optional Social Icons */}
               <div className="flex justify-center space-x-4 mt-2">

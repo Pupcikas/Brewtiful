@@ -137,12 +137,12 @@ namespace Brewtiful.Controllers
                     if (ingredientDict.TryGetValue(ingredientId, out var ingredient))
                     {
                         // Use the actual quantities from the cart item
-                        string ingredientName = ingredient.Name;
+                        string ingredientIdStr = ingredientId.ToString(); // Match key format (ID as string)
 
                         int quantity = cartItem.IngredientQuantities != null &&
-                                       cartItem.IngredientQuantities.ContainsKey(ingredientName)
-                            ? cartItem.IngredientQuantities[ingredientName]
-                            : ingredient.DefaultQuantity;
+                                       cartItem.IngredientQuantities.ContainsKey(ingredientIdStr)
+                            ? cartItem.IngredientQuantities[ingredientIdStr] // Use quantity from cart
+                            : ingredient.DefaultQuantity; // Fallback to default
 
                         int extraQuantity = Math.Max(0, quantity - ingredient.DefaultQuantity);
                         itemTotal += extraQuantity * ingredient.ExtraCost;
@@ -184,6 +184,8 @@ namespace Brewtiful.Controllers
 
             return Ok(new { message = "Checkout successful.", orderId = order.Id });
         }
+
+
 
 
 

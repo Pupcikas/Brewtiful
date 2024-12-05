@@ -261,15 +261,15 @@ function Ingredients() {
         <Link
           className={`${
             location.pathname === "/profile" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/profile"
         >
-          Profile
+          Account
         </Link>
         <Link
           className={`${
             location.pathname === "/categories" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/categories"
         >
           Categories
@@ -277,7 +277,7 @@ function Ingredients() {
         <Link
           className={`${
             location.pathname === "/items" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/items"
         >
           Items
@@ -285,7 +285,7 @@ function Ingredients() {
         <Link
           className={`${
             location.pathname === "/ingredients" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/ingredients"
         >
           Ingredients
@@ -293,7 +293,7 @@ function Ingredients() {
         <Link
           className={`${
             location.pathname === "/users" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/users"
         >
           Users
@@ -301,7 +301,7 @@ function Ingredients() {
         <Link
           className={`${
             location.pathname === "/admin/orders" ? "active" : ""
-          } px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors duration-300`}
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/admin/orders"
         >
           Orders
@@ -313,7 +313,7 @@ function Ingredients() {
         className="mt-8 w-full md:w-2/3 lg:w-1/2 mx-auto bg-white p-6 rounded shadow-md"
         onSubmit={handleCreateIngredient}
       >
-        <h2 className="text-center text-primary text-2xl font-semibold mb-4">
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
           Create New Ingredient
         </h2>
         <div className="flex flex-col gap-4">
@@ -388,7 +388,7 @@ function Ingredients() {
 
       {/* Existing Ingredients List */}
       <div className="mt-8">
-        <h2 className="text-center text-primary text-2xl font-semibold mb-4">
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
           Existing Ingredients
         </h2>
         {ingredients.length === 0 ? (

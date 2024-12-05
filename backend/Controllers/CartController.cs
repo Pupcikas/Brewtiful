@@ -87,13 +87,12 @@ namespace Brewtiful.Controllers
                     {
                         if (ingredientDict.TryGetValue(ingredientId, out var ingredient))
                         {
-                            // Use the ingredient name as the key to access IngredientQuantities
-                            string ingredientName = ingredient.Name;
+                            // Use the quantities from the cart item, not the defaults
+                            string ingredientIdStr = ingredientId.ToString();
 
-                            int quantity = cartItem.IngredientQuantities != null &&
-                                           cartItem.IngredientQuantities.ContainsKey(ingredientName)
-                                ? cartItem.IngredientQuantities[ingredientName] // Use quantity from IngredientQuantities
-                                : ingredient.DefaultQuantity; // Fallback to default quantity
+                            int quantity = cartItem.IngredientQuantities != null && cartItem.IngredientQuantities.ContainsKey(ingredientIdStr)
+                                ? cartItem.IngredientQuantities[ingredientIdStr]
+                                : ingredient.DefaultQuantity;
 
                             int extraQuantity = Math.Max(0, quantity - ingredient.DefaultQuantity);
                             totalPrice += extraQuantity * ingredient.ExtraCost;
@@ -102,7 +101,7 @@ namespace Brewtiful.Controllers
                             {
                                 Id = ingredient.Id,
                                 Name = ingredient.Name,
-                                Quantity = quantity, // Use the retrieved quantity
+                                Quantity = quantity,
                                 DefaultQuantity = ingredient.DefaultQuantity
                             });
 
@@ -122,6 +121,8 @@ namespace Brewtiful.Controllers
                 })
                 .Where(e => e != null)
                 .ToList();
+
+
 
 
 
@@ -184,7 +185,7 @@ namespace Brewtiful.Controllers
 
                 await _carts.ReplaceOneAsync(c => c.Id == cart.Id, cart);
 
-                return Ok(cart);
+                return Ok(new { message = "Item added to cart successfully." });
             }
             catch (Exception ex)
             {
@@ -197,6 +198,8 @@ namespace Brewtiful.Controllers
                 });
             }
         }
+
+
 
 
 

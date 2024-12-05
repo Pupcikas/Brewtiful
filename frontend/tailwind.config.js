@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["Roboto", "sans-serif"],
+        recoleta: ["Recoleta", "serif"],
       },
       colors: {
         primary: "#ffffff",

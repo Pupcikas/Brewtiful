@@ -98,7 +98,7 @@ function UsersProfile() {
 
   return (
     <section className="mt-8 max-w-md mx-auto p-4">
-      <h1 className="text-center text-primary text-3xl mb-6">My Profile</h1>
+      <h1 className="text-center text-primary text-3xl mb-6">My Account</h1>
       <form
         className="bg-white p-6 rounded shadow-md"
         onSubmit={handleUpdateProfile}
@@ -192,7 +192,7 @@ function UsersProfile() {
               onClick={() => setEditMode(true)}
               className="bg-primary hover:bg-primary-dark text-black px-4 py-2 rounded transition-colors duration-300"
             >
-              Edit Profile
+              Edit Account
             </button>
           </div>
         )}

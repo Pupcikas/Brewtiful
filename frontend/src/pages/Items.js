@@ -21,6 +21,7 @@ function Items() {
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [editingItem, setEditingItem] = useState(null);
+  const [fileLabel, setFileLabel] = useState("Choose File");
   const [editedItem, setEditedItem] = useState({
     name: "",
     price: "",
@@ -130,7 +131,16 @@ function Items() {
       if (newItem.picture) {
         formData.append("picture", newItem.picture);
       }
-
+      // Handle file input change
+      const handleNewItemChange = (field, value) => {
+        if (field === "picture") {
+          setFileLabel(value ? value.name : "No File Chosen"); // Update the file label
+        }
+        setNewItem((prevItem) => ({
+          ...prevItem,
+          [field]: value,
+        }));
+      };
       // Send POST request to create item
       await api.post("/Item", formData, {
         headers: {
@@ -299,7 +309,7 @@ function Items() {
           } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/profile"
         >
-          Profile
+          Account
         </Link>
         <Link
           className={`${
@@ -446,7 +456,10 @@ function Items() {
               htmlFor="item-picture"
               className="block text-gray-700 font-medium mb-2"
             >
-              Picture
+              Picture{" "}
+              <span className="mr-4 font-bold text-black underline hover:cursor-pointer">
+                {fileLabel}
+              </span>
             </label>
             <input
               type="file"
@@ -455,7 +468,7 @@ function Items() {
               onChange={(e) =>
                 handleNewItemChange("picture", e.target.files[0])
               }
-              className="w-full"
+              className="hidden"
             />
           </div>
           <button
@@ -469,7 +482,7 @@ function Items() {
 
       {/* Existing Items List */}
       <div className="mt-8">
-        <h2 className="text-center text-primary text-2xl font-semibold mb-4">
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
           Existing Items
         </h2>
         {items.length === 0 ? (

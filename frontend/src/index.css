@@ -1,9 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './components/fonts.css';
+
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Recoleta', serif;
 }
 /*
 input[type="email"],

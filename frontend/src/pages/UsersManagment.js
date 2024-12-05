@@ -189,7 +189,7 @@ function UsersManagement() {
           } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
           to="/profile"
         >
-          Profile
+          Account
         </Link>
         <Link
           className={`${

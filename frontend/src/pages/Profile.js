@@ -43,7 +43,7 @@ function Profile() {
             } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
             to="/profile"
           >
-            Profile
+            Account
           </Link>
           <Link
             className={`${
@@ -89,7 +89,7 @@ function Profile() {
       )}
 
       <h1 className="text-center text-black text-4xl mb-6">
-        {profile.name}'s Profile
+        {profile.name}'s Account
       </h1>
       <form className="max-w-md mx-auto bg-white p-6 rounded shadow-md">
         <div className="mb-4">
