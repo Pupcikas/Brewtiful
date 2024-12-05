@@ -1,4 +1,4 @@
-// src/components/AdminOrders.js
+// src/pages/AdminOrders.js
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
 
@@ -94,25 +94,31 @@ export default function AdminOrders() {
     fetchAllOrders(newStatus);
   };
 
-  if (loading) return <div className="text-center mt-8">Loading...</div>;
+  if (loading)
+    return <div className="text-center mt-8 text-gray-700">Loading...</div>;
 
   if (orders.length === 0)
-    return <div className="text-center mt-8">No orders found.</div>;
+    return (
+      <div className="text-center mt-8 text-gray-700">No orders found.</div>
+    );
 
   return (
     <section className="orders-section mt-8 max-w-7xl mx-auto px-4">
-      <h1 className="text-center text-primary text-4xl mb-6">All Orders</h1>
+      <h1 className="text-center text-black text-4xl mb-6">All Orders</h1>
 
       {/* Filter UI */}
       <div className="flex justify-end mb-4">
-        <label htmlFor="statusFilter" className="mr-2 font-semibold">
+        <label
+          htmlFor="statusFilter"
+          className="mr-2 font-semibold text-gray-700"
+        >
           Filter by Status:
         </label>
         <select
           id="statusFilter"
           value={selectedStatus}
           onChange={handleStatusChange}
-          className="border border-gray-300 rounded px-2 py-1"
+          className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-300"
         >
           {ORDER_STATUSES.map((status) => (
             <option key={status} value={status}>
@@ -126,19 +132,24 @@ export default function AdminOrders() {
       {orders.map((order) => (
         <div
           key={order.id}
-          className="order bg-white p-6 rounded shadow-md mb-6"
+          className="order bg-white p-6 rounded shadow-md mb-6 transition-transform transform hover:scale-105 duration-300"
         >
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold">Order ID: {order.id}</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Order ID: {order.id}
+            </h2>
             <div>
-              <label htmlFor={`status-${order.id}`} className="mr-2">
+              <label
+                htmlFor={`status-${order.id}`}
+                className="mr-2 text-gray-700 font-medium"
+              >
                 Update Status:
               </label>
               <select
                 id={`status-${order.id}`}
                 value={order.status}
                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                className="border border-gray-300 rounded px-2 py-1"
+                className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary transition-colors duration-300"
               >
                 <option value="Pending">Pending</option>
                 <option value="Processing">Processing</option>
@@ -147,22 +158,22 @@ export default function AdminOrders() {
               </select>
             </div>
           </div>
-          <p className="mb-2">
+          <p className="mb-2 text-gray-700">
             <strong>User ID:</strong> {order.userId}
           </p>
-          <p className="mb-2">
+          <p className="mb-2 text-gray-700">
             <strong>Status:</strong> {order.status}
           </p>
-          <p className="mb-4">
+          <p className="mb-4 text-gray-700">
             <strong>Created At:</strong>{" "}
             {new Date(order.createdAt).toLocaleString()}
           </p>
-          <ul className="list-disc list-inside mb-4">
+          <ul className="list-disc list-inside mb-4 text-gray-700">
             {order.items.map((item, index) => (
               <li key={index}>
                 <strong>{item.itemName}</strong> x {item.quantity} - $
                 {(item.price * item.quantity).toFixed(2)}
-                <ul className="list-disc list-inside ml-6">
+                <ul className="list-disc list-inside ml-6 text-gray-600">
                   {item.ingredients.map((ing) => (
                     <li key={ing.ingredientId}>
                       {ing.name} (Qty: {ing.quantity}) - Extra Cost: $
@@ -173,7 +184,7 @@ export default function AdminOrders() {
               </li>
             ))}
           </ul>
-          <p className="text-xl font-semibold">
+          <p className="text-xl font-semibold text-gray-800">
             Total Amount: ${order.totalAmount.toFixed(2)}
           </p>
         </div>

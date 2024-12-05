@@ -1,221 +1,199 @@
-// src/components/Menu.js
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
 import monitorToken from "./monitorToken";
+import { Link } from "react-router-dom";
 import { useCart } from "./CartContext";
+import Modal from "../components/Modal";
 
-export default function Menu() {
+function Menu() {
   const [profile, setProfile] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [ingredientsInfo, setIngredientsInfo] = useState([]);
-  const [ingredientQuantities, setIngredientQuantities] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [categories, setCategories] = useState({});
+  const [modalTitle, setModalTitle] = useState("");
   const { addToCart } = useCart();
 
   useEffect(() => {
     monitorToken();
 
-    const fetchData = async () => {
+    const fetchItems = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+        const { data: profileData } = await api.get("/auth/profile", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setProfile(profileData);
 
-        const headers = { Authorization: `Bearer ${token}` };
+        if (profileData.role === "Admin") {
+          setModalMessage("Admins should use the Admin Orders page.");
+          setModalTitle("Access Denied");
+          setIsModalOpen(true);
+          return;
+        }
 
-        const [profileResponse, categoriesResponse, itemsResponse] =
-          await Promise.all([
-            api.get("/auth/profile", { headers }),
-            api.get("/Category", { headers }),
-            api.get("/Item", { headers }),
-          ]);
+        // Fetch categories
+        const { data: categoryData } = await api.get("/Category", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
 
-        setProfile(profileResponse.data);
-        setCategories(categoriesResponse.data);
-        setItems(itemsResponse.data);
+        // Convert categories into a mapping of id -> name
+        const categoryMap = categoryData.reduce((map, category) => {
+          map[category.id] = category.name;
+          return map;
+        }, {});
+        setCategories(categoryMap);
+
+        const { data: itemsData } = await api.get("/Item", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        const itemsWithDynamicQuantities = itemsData.map((item) => ({
+          ...item,
+          ingredients: item.ingredients.map((ing) => ({
+            ...ing,
+            quantity: ing.defaultQuantity,
+          })),
+        }));
+
+        setItems(itemsWithDynamicQuantities);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching items:", error);
+        setModalMessage("Failed to fetch menu items.");
+        setModalTitle("Error");
+        setIsModalOpen(true);
       }
     };
 
-    fetchData();
+    fetchItems();
   }, []);
 
+  const handleIngredientQuantityChange = (
+    itemId,
+    ingredientId,
+    newQuantity
+  ) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              ingredients: item.ingredients.map((ing) =>
+                ing.id === ingredientId
+                  ? { ...ing, quantity: newQuantity }
+                  : ing
+              ),
+            }
+          : item
+      )
+    );
+  };
+
+  const calculatePrice = (item) => {
+    const basePrice = item.price;
+    const extraCost = item.ingredients.reduce(
+      (acc, ing) => acc + (ing.quantity - ing.defaultQuantity) * ing.extraCost,
+      0
+    );
+    return basePrice + extraCost;
+  };
+
   const handleAddToCart = async (item) => {
-    setSelectedItem(item);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You need to be logged in to add items to the cart.");
-        return;
-      }
-
-      const headers = { Authorization: `Bearer ${token}` };
-
-      const ingredientPromises = item.ingredientIds.map((id) =>
-        api.get(`/Ingredient/${id}`, { headers })
+      const ingredientQuantities = Object.fromEntries(
+        item.ingredients.map((ing) => [ing.name, ing.quantity])
       );
-      const ingredientResponses = await Promise.all(ingredientPromises);
-      const ingredientData = ingredientResponses.map((res) => res.data);
-      setIngredientsInfo(ingredientData);
+      const totalPrice = calculatePrice(item);
 
-      const initialQuantities = {};
-      ingredientData.forEach(
-        (ingredient) =>
-          (initialQuantities[ingredient.id] = ingredient.defaultQuantity)
-      );
-      setIngredientQuantities(initialQuantities);
+      const payload = {
+        ItemId: item.id,
+        Quantity: 1,
+        IngredientQuantities: ingredientQuantities,
+      };
+
+      await addToCart(item, item.ingredients, ingredientQuantities, totalPrice);
+      setModalMessage(`${item.name} added to cart.`);
+      setModalTitle("Success");
+      setIsModalOpen(true);
     } catch (error) {
-      console.error("Error fetching ingredients info:", error);
+      console.error("Error adding to cart:", error);
+      setModalMessage(
+        error.response?.data?.message ||
+          "An unexpected error occurred while adding the item to the cart."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
-  const handleQuantityChange = (ingredientId, delta) => {
-    setIngredientQuantities((prevQuantities) => {
-      const updatedQuantities = { ...prevQuantities };
-      updatedQuantities[ingredientId] = Math.max(
-        0,
-        (updatedQuantities[ingredientId] || 0) + delta
-      );
-      return updatedQuantities;
-    });
-  };
+  const groupedItems = items.reduce((acc, item) => {
+    const category = categories[item.categoryId] || "Uncategorized";
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(item);
+    return acc;
+  }, {});
 
-  const calculateTotalPrice = () => {
-    if (!selectedItem) return 0;
-
-    let totalPrice = selectedItem.price;
-    ingredientsInfo.forEach((ingredient) => {
-      const quantity = ingredientQuantities[ingredient.id] || 0;
-      const extraQuantity = Math.max(0, quantity - ingredient.defaultQuantity);
-      totalPrice += extraQuantity * ingredient.extraCost;
-    });
-    return totalPrice.toFixed(2);
-  };
-
-  const handleAddToOrder = async () => {
-    if (!selectedItem) return;
-
-    await addToCart(
-      selectedItem,
-      ingredientsInfo,
-      ingredientQuantities,
-      calculateTotalPrice()
-    );
-    alert(`Item ${selectedItem.name} added to your cart!`);
-    closeModal();
-  };
-
-  const closeModal = () => {
-    setSelectedItem(null);
-    setIngredientsInfo([]);
-    setIngredientQuantities({});
-  };
-
-  if (!profile) return <div>Loading...</div>;
+  if (!profile)
+    return <div className="text-center mt-8 text-gray-700">Loading...</div>;
 
   return (
-    <section className="menu-section mt-8 max-w-7xl mx-auto">
-      <h1 className="text-center text-primary text-4xl mb-6">Menu</h1>
-      {categories.map((category) => (
-        <div key={category.id} className="category-section mb-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            {category.name}
-          </h2>
-          <div className="items-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items
-              .filter((item) => item.categoryId === category.id)
-              .map((item) => (
+    <section className="mt-8 max-w-7xl mx-auto p-4">
+      <h1 className="text-center text-black text-4xl mb-6">Our Menu</h1>
+      {Object.keys(groupedItems).length === 0 ? (
+        <div className="text-center text-gray-700">No items available.</div>
+      ) : (
+        Object.entries(groupedItems).map(([category, items]) => (
+          <div key={category} className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              {category}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map((item) => (
                 <div
                   key={item.id}
-                  className="item-card bg-white p-4 rounded shadow-md"
+                  className="bg-white p-6 rounded-lg shadow hover:shadow-lg flex flex-col transition-transform transform hover:scale-105 duration-300 border border-gray-200"
                 >
                   {item.pictureUrl && (
                     <img
                       src={item.pictureUrl}
                       alt={item.name}
-                      className="w-full h-32 object-cover rounded mb-4"
+                      className="w-full h-40 object-cover rounded mb-4"
                     />
                   )}
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
                     {item.name}
                   </h3>
+                  <p className="text-gray-600 text-sm mb-2">
+                    <strong>Price:</strong> ${item.price.toFixed(2)}
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
+                    {item.ingredients.map((ing) => (
+                      <li key={ing.id}>
+                        {ing.name} - Qty: {ing.quantity} (Extra Cost: $
+                        {ing.extraCost.toFixed(2)})
+                      </li>
+                    ))}
+                  </ul>
                   <button
-                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 flex justify-center items-center mt-2"
                     onClick={() => handleAddToCart(item)}
+                    className="mt-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition duration-300"
                   >
-                    Add to Cart - ${item.price}
+                    Add to Cart
                   </button>
                 </div>
               ))}
-          </div>
-        </div>
-      ))}
-      {selectedItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-1/3 p-6 rounded shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              {selectedItem.name}
-            </h2>
-            {selectedItem.pictureUrl && (
-              <img
-                src={selectedItem.pictureUrl}
-                alt={selectedItem.name}
-                className="w-full h-48 object-cover rounded mb-4"
-              />
-            )}
-            <p className="text-gray-600 mb-4">
-              Updated Price: ${calculateTotalPrice()}
-            </p>
-            <p className="text-gray-500 mb-4">Ingredients:</p>
-            <ul className="list-disc list-inside text-gray-600 mb-4">
-              {ingredientsInfo.map((ingredient) => (
-                <li
-                  key={ingredient.id}
-                  className="flex justify-between items-center"
-                >
-                  <div>
-                    <strong>{ingredient.name}</strong> - ($
-                    {ingredient.extraCost.toFixed(2)} per extra)
-                  </div>
-                  <div className="flex items-center">
-                    <button
-                      className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                      onClick={() => handleQuantityChange(ingredient.id, -1)}
-                    >
-                      -
-                    </button>
-                    <span className="px-4">
-                      {ingredientQuantities[ingredient.id] ||
-                        ingredient.defaultQuantity}
-                    </span>
-                    <button
-                      className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                      onClick={() => handleQuantityChange(ingredient.id, 1)}
-                    >
-                      +
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
-                onClick={closeModal}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
-                onClick={handleAddToOrder}
-              >
-                Add to Cart
-              </button>
             </div>
           </div>
-        </div>
+        ))
       )}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalTitle}
+      >
+        <p>{modalMessage}</p>
+      </Modal>
     </section>
   );
 }
+
+export default Menu;

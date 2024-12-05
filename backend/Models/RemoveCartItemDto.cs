@@ -3,6 +3,6 @@ namespace Brewtiful.Models
 {
     public class RemoveCartItemDto
     {
-        public int ItemId { get; set; }
+        public string ItemId { get; set; }
     }
 }

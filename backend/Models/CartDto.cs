@@ -12,12 +12,12 @@ namespace Brewtiful.Models
 
     public class EnrichedCartItem
     {
-        public int Id { get; set; } // ItemId
+        public string Id { get; set; } // ItemId
         public string Name { get; set; }
         public double Price { get; set; }
         public double TotalPrice { get; set; }
         public List<IngredientInfo> IngredientsInfo { get; set; }
-        public Dictionary<int, int> IngredientQuantities { get; set; }
+        public Dictionary<string, int> IngredientQuantities { get; set; }
     }
 
     public class IngredientInfo

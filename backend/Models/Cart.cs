@@ -8,9 +8,9 @@ namespace Brewtiful.Models
 {
     public class CartItem
     {
-        public int ItemId { get; set; }
+        public string ItemId { get; set; }
         public int Quantity { get; set; } = 1;
-        public Dictionary<int, int> IngredientQuantities { get; set; } = new Dictionary<int, int>();
+        public Dictionary<string, int> IngredientQuantities { get; set; } = new Dictionary<string, int>();
     }
 
     public class Cart

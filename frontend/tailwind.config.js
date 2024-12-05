@@ -7,8 +7,14 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Roboto", "sans-serif"],
+      },
       colors: {
-        primary: "#d82a03",
+        primary: "#ffffff",
+        secondary: "#01256C",
+        accent: "#EF4444",
+        background: "#e3ecf1",
       },
     },
   },

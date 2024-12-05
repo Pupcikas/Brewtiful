@@ -13,7 +13,9 @@ namespace Brewtiful.Models
     public class Item
     {
         [BsonId]
-        public int Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+
         public string Name { get; set; }
         public int CategoryId { get; set; }
 

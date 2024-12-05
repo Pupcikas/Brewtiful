@@ -27,133 +27,187 @@ namespace Brewtiful.Controllers
             _ingredients = database.GetCollection<Ingredient>("Ingredients");
         }
 
-        // GET: api/Cart
         [HttpGet]
         [Authorize(Roles = "User")]
         public async Task<ActionResult<CartDto>> GetCart()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized(new { message = "User not authenticated." });
-
-            var cart = await _carts.Find(c => c.UserId == userId && c.Status == "Active").FirstOrDefaultAsync();
-            if (cart == null)
+            try
             {
-                cart = new Cart { UserId = userId };
-                await _carts.InsertOneAsync(cart);
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { message = "User not authenticated." });
 
-            // Fetch all items in the cart
-            var itemIds = cart.Items.Select(ci => ci.ItemId).ToList();
-            var items = await _items.Find(i => itemIds.Contains(i.Id)).ToListAsync();
-
-            // Fetch all ingredients to minimize database calls
-            var allIngredientIds = items.SelectMany(i => i.IngredientIds).Distinct().ToList();
-            var ingredients = await _ingredients.Find(ing => allIngredientIds.Contains(ing.Id)).ToListAsync();
-            var ingredientDict = ingredients.ToDictionary(ing => ing.Id, ing => ing);
-
-            // Enrich cart items with item details
-            var enrichedItems = cart.Items.Select(cartItem =>
-            {
-                var item = items.FirstOrDefault(i => i.Id == cartItem.ItemId);
-                if (item == null)
-                    return null; // Or handle missing items appropriately
-
-                // Calculate total price for the item
-                double totalPrice = item.Price;
-                var ingredientsInfo = new List<IngredientInfo>();
-
-                foreach (var ingredientId in item.IngredientIds)
+                var cart = await _carts.Find(c => c.UserId == userId && c.Status == "Active").FirstOrDefaultAsync();
+                if (cart == null)
                 {
-                    if (ingredientDict.TryGetValue(ingredientId, out var ingredient))
+                    cart = new Cart
                     {
-                        int quantity = cartItem.IngredientQuantities.ContainsKey(ingredientId)
-                            ? cartItem.IngredientQuantities[ingredientId]
-                            : ingredient.DefaultQuantity;
-
-                        int extraQuantity = quantity > ingredient.DefaultQuantity ? quantity - ingredient.DefaultQuantity : 0;
-                        totalPrice += extraQuantity * ingredient.ExtraCost;
-
-                        ingredientsInfo.Add(new IngredientInfo
-                        {
-                            Id = ingredient.Id,
-                            Name = ingredient.Name,
-                            Quantity = quantity,
-                            DefaultQuantity = ingredient.DefaultQuantity
-                        });
-                    }
+                        UserId = userId,
+                        Items = new List<CartItem>() // Initialize Items
+                    };
+                    await _carts.InsertOneAsync(cart);
                 }
 
-                return new EnrichedCartItem
+                var itemIds = cart.Items?.Select(ci => ci.ItemId).ToList() ?? new List<string>();
+                if (!itemIds.Any())
                 {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Price = item.Price,
-                    TotalPrice = totalPrice,
-                    IngredientsInfo = ingredientsInfo,
-                    IngredientQuantities = cartItem.IngredientQuantities
+                    var emptyCartDto = new CartDto
+                    {
+                        Id = cart.Id,
+                        UserId = cart.UserId,
+                        Items = new List<EnrichedCartItem>(),
+                        Status = cart.Status,
+                        CreatedAt = cart.CreatedAt,
+                        CheckedOutAt = cart.CheckedOutAt
+                    };
+                    return Ok(emptyCartDto);
+                }
+
+                var items = await _items.Find(i => itemIds.Contains(i.Id)).ToListAsync();
+                if (items == null)
+                {
+                    return StatusCode(500, new { message = "Error fetching items from the database." });
+                }
+
+                var allIngredientIds = items.SelectMany(i => i.IngredientIds).Distinct().ToList();
+                var ingredients = await _ingredients.Find(ing => allIngredientIds.Contains(ing.Id)).ToListAsync();
+                var ingredientDict = ingredients.ToDictionary(ing => ing.Id, ing => ing);
+
+                var enrichedItems = cart.Items.Select(cartItem =>
+                {
+                    var item = items.FirstOrDefault(i => i.Id.Equals(cartItem.ItemId));
+                    if (item == null)
+                        return null;
+
+                    double totalPrice = item.Price;
+                    var ingredientsInfo = new List<IngredientInfo>();
+                    var ingredientNameQuantities = new Dictionary<string, int>();
+
+                    foreach (var ingredientId in item.IngredientIds)
+                    {
+                        if (ingredientDict.TryGetValue(ingredientId, out var ingredient))
+                        {
+                            // Use the ingredient name as the key to access IngredientQuantities
+                            string ingredientName = ingredient.Name;
+
+                            int quantity = cartItem.IngredientQuantities != null &&
+                                           cartItem.IngredientQuantities.ContainsKey(ingredientName)
+                                ? cartItem.IngredientQuantities[ingredientName] // Use quantity from IngredientQuantities
+                                : ingredient.DefaultQuantity; // Fallback to default quantity
+
+                            int extraQuantity = Math.Max(0, quantity - ingredient.DefaultQuantity);
+                            totalPrice += extraQuantity * ingredient.ExtraCost;
+
+                            ingredientsInfo.Add(new IngredientInfo
+                            {
+                                Id = ingredient.Id,
+                                Name = ingredient.Name,
+                                Quantity = quantity, // Use the retrieved quantity
+                                DefaultQuantity = ingredient.DefaultQuantity
+                            });
+
+                            ingredientNameQuantities[ingredient.Name] = quantity;
+                        }
+                    }
+
+                    return new EnrichedCartItem
+                    {
+                        Id = item.Id,
+                        Name = item.Name,
+                        Price = item.Price,
+                        TotalPrice = totalPrice,
+                        IngredientsInfo = ingredientsInfo,
+                        IngredientQuantities = ingredientNameQuantities
+                    };
+                })
+                .Where(e => e != null)
+                .ToList();
+
+
+
+                var cartDto = new CartDto
+                {
+                    Id = cart.Id,
+                    UserId = cart.UserId,
+                    Items = enrichedItems,
+                    Status = cart.Status,
+                    CreatedAt = cart.CreatedAt,
+                    CheckedOutAt = cart.CheckedOutAt
                 };
-            })
-            .Where(e => e != null)
-            .ToList();
 
-            var cartDto = new CartDto
+                return Ok(cartDto);
+            }
+            catch (Exception ex)
             {
-                Id = cart.Id,
-                UserId = cart.UserId,
-                Items = enrichedItems,
-                Status = cart.Status,
-                CreatedAt = cart.CreatedAt,
-                CheckedOutAt = cart.CheckedOutAt
-            };
-
-            return Ok(cartDto);
+                return StatusCode(500, new { message = "An unexpected error occurred while processing your request." });
+            }
         }
 
-        // POST: api/Cart/add
+
+
         [HttpPost("add")]
-        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> AddToCart([FromBody] CartItemDto cartItemDto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized(new { message = "User not authenticated." });
-
-            var cart = await _carts.Find(c => c.UserId == userId && c.Status == "Active").FirstOrDefaultAsync();
-            if (cart == null)
+            try
             {
-                cart = new Cart { UserId = userId };
-                await _carts.InsertOneAsync(cart);
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { message = "User not authenticated." });
 
-            // Check if the item already exists in the cart
-            var existingItem = cart.Items.FirstOrDefault(i => i.ItemId == cartItemDto.ItemId);
-            if (existingItem != null)
-            {
-                existingItem.Quantity += cartItemDto.Quantity;
-                foreach (var kvp in cartItemDto.IngredientQuantities)
+                var cart = await _carts.Find(c => c.UserId == userId && c.Status == "Active").FirstOrDefaultAsync();
+                if (cart == null)
                 {
-                    if (existingItem.IngredientQuantities.ContainsKey(kvp.Key))
-                        existingItem.IngredientQuantities[kvp.Key] += kvp.Value;
-                    else
-                        existingItem.IngredientQuantities[kvp.Key] = kvp.Value;
+                    cart = new Cart { UserId = userId, Items = new List<CartItem>() };
+                    await _carts.InsertOneAsync(cart);
                 }
-            }
-            else
-            {
-                cart.Items.Add(new CartItem
+
+                // Check for identical item (same ItemId and IngredientQuantities)
+                var existingItem = cart.Items.FirstOrDefault(ci =>
+                    ci.ItemId == cartItemDto.ItemId &&
+                    ci.IngredientQuantities.Count == cartItemDto.IngredientQuantities.Count &&
+                    !ci.IngredientQuantities.Except(cartItemDto.IngredientQuantities).Any()
+                );
+
+                if (existingItem != null)
                 {
-                    ItemId = cartItemDto.ItemId,
-                    Quantity = cartItemDto.Quantity,
-                    IngredientQuantities = cartItemDto.IngredientQuantities
+                    existingItem.Quantity += cartItemDto.Quantity;
+                }
+                else
+                {
+                    cart.Items.Add(new CartItem
+                    {
+                        ItemId = cartItemDto.ItemId,
+                        Quantity = cartItemDto.Quantity,
+                        IngredientQuantities = cartItemDto.IngredientQuantities // Preserve provided quantities
+                    });
+                }
+
+                await _carts.ReplaceOneAsync(c => c.Id == cart.Id, cart);
+
+                return Ok(cart);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message,
+                    Instance = HttpContext.Request.Path
                 });
             }
-
-            var update = Builders<Cart>.Update.Set(c => c.Items, cart.Items);
-            await _carts.UpdateOneAsync(c => c.Id == cart.Id, update);
-
-            return Ok(new { message = "Item added to cart successfully." });
         }
+
+
+
+        // Helper method to fetch the ingredient name-to-ID mapping
+        private async Task<Dictionary<string, int>> GetIngredientNameToIdMapAsync()
+        {
+            // Assuming you have a collection or service to fetch ingredient data
+            var ingredients = await _ingredients.Find(_ => true).ToListAsync();
+            return ingredients.ToDictionary(ing => ing.Name, ing => ing.Id);
+        }
+
 
         // POST: api/Cart/remove
         [HttpPost("remove")]
@@ -167,7 +221,7 @@ namespace Brewtiful.Controllers
             if (cart == null)
                 return NotFound(new { message = "Cart not found." });
 
-            var item = cart.Items.FirstOrDefault(i => i.ItemId == removeDto.ItemId);
+            var item = cart.Items.FirstOrDefault(i => i.ItemId.Equals(removeDto.ItemId));
             if (item == null)
                 return NotFound(new { message = "Item not found in cart." });
 

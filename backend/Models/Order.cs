@@ -18,7 +18,8 @@ namespace Brewtiful.Models
 
     public class OrderItem
     {
-        public int ItemId { get; set; }
+        [BsonElement("ItemId")]
+        public string ItemId { get; set; }
         public string ItemName { get; set; }
         public List<IngredientDetail> Ingredients { get; set; }
         public double Price { get; set; }

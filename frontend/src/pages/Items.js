@@ -1,9 +1,11 @@
+// src/pages/Items.js
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
-import monitorToken from "./monitorToken";
+import monitorToken from "../pages/monitorToken";
 import { Link, useLocation } from "react-router-dom";
+import Modal from "../components/Modal";
 
-export default function Items() {
+function Items() {
   const [profile, setProfile] = useState(null);
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -15,6 +17,17 @@ export default function Items() {
   });
   const [categories, setCategories] = useState([]);
   const [ingredients, setIngredients] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
+  const [editedItem, setEditedItem] = useState({
+    name: "",
+    price: "",
+    categoryId: "",
+    ingredientIds: [],
+    picture: null,
+  });
   const location = useLocation();
 
   useEffect(() => {
@@ -28,24 +41,19 @@ export default function Items() {
         });
         setProfile(profileData);
 
-        // Fetch items and initialize edited fields and success state
+        // Check if user is Admin
+        if (profileData.role !== "Admin") {
+          setModalMessage("You are not authorized to view this page.");
+          setModalTitle("Authorization Error");
+          setIsModalOpen(true);
+          return;
+        }
+
+        // Fetch items
         const { data: itemsData } = await api.get("/Item", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        const itemsWithExtras = itemsData.map((item) => ({
-          ...item,
-          editedName: item.name,
-          editedPrice: item.price,
-          editedCategoryId: item.categoryId,
-          editedIngredientIds: Array.isArray(item.ingredientIds)
-            ? item.ingredientIds.map((id) => Number(id))
-            : [],
-          pictureUrl: item.pictureUrl || "",
-          editedPicture: null,
-          success: false,
-        }));
-        console.log("Initialized Items with Extras:", itemsWithExtras); // Debugging
-        setItems(itemsWithExtras);
+        setItems(itemsData);
 
         // Fetch categories
         const { data: categoriesData } = await api.get("/Category", {
@@ -60,6 +68,9 @@ export default function Items() {
         setIngredients(ingredientsData);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setModalMessage("Failed to fetch items, categories, or ingredients.");
+        setModalTitle("Error");
+        setIsModalOpen(true);
       }
     };
 
@@ -90,15 +101,21 @@ export default function Items() {
 
     // Validate new item fields
     if (!newItem.name.trim()) {
-      alert("Please enter an item name.");
+      setModalMessage("Please enter an item name.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
     if (!newItem.price || isNaN(newItem.price) || Number(newItem.price) <= 0) {
-      alert("Please enter a valid price.");
+      setModalMessage("Please enter a valid price.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
     if (!newItem.categoryId) {
-      alert("Please select a category.");
+      setModalMessage("Please select a category.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
 
@@ -122,24 +139,11 @@ export default function Items() {
         },
       });
 
-      // Fetch updated items list and initialize edited fields and success state
+      // Fetch updated items list
       const { data: itemsData } = await api.get("/Item", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      const itemsWithExtras = itemsData.map((item) => ({
-        ...item,
-        editedName: item.name,
-        editedPrice: item.price,
-        editedCategoryId: item.categoryId,
-        editedIngredientIds: Array.isArray(item.ingredientIds)
-          ? item.ingredientIds.map((id) => Number(id))
-          : [],
-        pictureUrl: item.pictureUrl || "",
-        editedPicture: null,
-        success: false,
-      }));
-      console.log("Fetched Updated Items:", itemsWithExtras); // Debugging
-      setItems(itemsWithExtras);
+      setItems(itemsData);
 
       // Clear new item fields
       setNewItem({
@@ -150,105 +154,64 @@ export default function Items() {
         picture: null,
       });
 
-      alert("Item created successfully.");
+      setModalMessage("Item created successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error creating item:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while creating the item.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while creating the item."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
-  // Handle changes to existing items
-  const handleItemChange = (itemId, field, value) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  // Handle adding/removing ingredients for existing items
-  const handleItemIngredientChange = (itemId, event) => {
-    const ingredientId = Number(event.target.value);
-    const isChecked = event.target.checked;
-
-    setItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === itemId) {
-          let updatedIngredientIds;
-          if (isChecked) {
-            // Add ingredient if not already present
-            if (!item.editedIngredientIds.includes(ingredientId)) {
-              updatedIngredientIds = [
-                ...item.editedIngredientIds,
-                ingredientId,
-              ];
-            } else {
-              updatedIngredientIds = item.editedIngredientIds;
-            }
-          } else {
-            // Remove ingredient if present
-            updatedIngredientIds = item.editedIngredientIds.filter(
-              (id) => id !== ingredientId
-            );
-          }
-
-          console.log(
-            `Updated ingredient IDs for item ${itemId}:`,
-            updatedIngredientIds
-          ); // Debugging
-
-          return { ...item, editedIngredientIds: updatedIngredientIds };
-        }
-        return item;
-      })
-    );
+  // Handle initiating edit
+  const handleEditInitiate = (item) => {
+    setEditingItem(item.id);
+    setEditedItem({
+      name: item.name,
+      price: item.price,
+      categoryId: item.categoryId,
+      ingredientIds: item.ingredientIds || [],
+      picture: null,
+    });
   };
 
   // Handle updating an existing item
   const handleUpdateItem = async (id) => {
-    const item = items.find((item) => item.id === id);
-
-    if (!item) {
-      alert("Item not found.");
-      return;
-    }
+    const { name, price, categoryId, ingredientIds, picture } = editedItem;
 
     // Validate item fields
-    if (!item.editedName.trim()) {
-      alert("Item name cannot be empty.");
+    if (!name.trim()) {
+      setModalMessage("Item name cannot be empty.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
-    if (
-      !item.editedPrice ||
-      isNaN(item.editedPrice) ||
-      Number(item.editedPrice) <= 0
-    ) {
-      alert("Please enter a valid price.");
+    if (!price || isNaN(price) || Number(price) <= 0) {
+      setModalMessage("Please enter a valid price.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
-    if (!item.editedCategoryId) {
-      alert("Please select a category.");
+    if (!categoryId) {
+      setModalMessage("Please select a category.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append("name", item.editedName);
-      formData.append("price", item.editedPrice);
-      formData.append("categoryId", item.editedCategoryId);
-      item.editedIngredientIds.forEach((id) =>
-        formData.append("ingredientIds", id)
-      );
-      if (item.editedPicture) {
-        formData.append("picture", item.editedPicture);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("categoryId", categoryId);
+      ingredientIds.forEach((id) => formData.append("ingredientIds", id));
+      if (picture) {
+        formData.append("picture", picture);
       }
 
       // Send PUT request to update item
@@ -259,45 +222,24 @@ export default function Items() {
         },
       });
 
-      // Update the item in the state and set success to true
-      setItems((prevItems) =>
-        prevItems.map((itm) =>
-          itm.id === id
-            ? {
-                ...itm,
-                name: itm.editedName,
-                price: itm.editedPrice,
-                categoryId: itm.editedCategoryId,
-                ingredientIds: itm.editedIngredientIds,
-                pictureUrl: itm.editedPicture
-                  ? `${itm.pictureUrl}?timestamp=${new Date().getTime()}`
-                  : itm.pictureUrl,
-                editedPicture: null,
-                success: true,
-              }
-            : itm
-        )
-      );
+      // Fetch updated items list
+      const { data: itemsData } = await api.get("/Item", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setItems(itemsData);
 
-      // Clear the success message after 3 seconds
-      setTimeout(() => {
-        setItems((prevItems) =>
-          prevItems.map((itm) =>
-            itm.id === id ? { ...itm, success: false } : itm
-          )
-        );
-      }, 3000);
+      setModalMessage("Item updated successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
+      setEditingItem(null);
     } catch (error) {
       console.error("Error updating item:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while updating the item.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while updating the item."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
@@ -315,283 +257,397 @@ export default function Items() {
       // Remove the deleted item from the state
       setItems((prevItems) => prevItems.filter((item) => item.id !== id));
 
-      alert("Item deleted successfully.");
+      setModalMessage("Item deleted successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error deleting item:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while deleting the item.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while deleting the item."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
-  if (!profile) return <div>Loading...</div>;
+  // Handle changes to editing item fields
+  const handleEditedItemChange = (field, value) => {
+    setEditedItem((prevItem) => ({
+      ...prevItem,
+      [field]: value,
+    }));
+  };
+
+  // Handle adding/removing ingredients for editing item
+  const handleEditedItemIngredientChange = (ingredientId) => {
+    setEditedItem((prevItem) => {
+      const ingredientIds = prevItem.ingredientIds.includes(ingredientId)
+        ? prevItem.ingredientIds.filter((id) => id !== ingredientId)
+        : [...prevItem.ingredientIds, ingredientId];
+      return { ...prevItem, ingredientIds };
+    });
+  };
 
   return (
-    <section className="mt-8 max-w-7xl mx-auto">
-      {profile.role === "Admin" && (
-        <div className="flex mx-auto items-center justify-center gap-2 my-4 tabs">
-          <Link
-            className={location.pathname === "/profile" ? "active" : ""}
-            to="/profile"
-          >
-            Profile
-          </Link>
-          <Link
-            className={location.pathname === "/categories" ? "active" : ""}
-            to="/categories"
-          >
-            Categories
-          </Link>
-          <Link
-            className={location.pathname === "/items" ? "active" : ""}
-            to="/items"
-          >
-            Items
-          </Link>
-          <Link
-            className={location.pathname === "/ingredients" ? "active" : ""}
-            to="/ingredients"
-          >
-            Ingredients
-          </Link>
-          <Link
-            className={location.pathname === "/users" ? "active" : ""}
-            to="/users"
-          >
-            Users
-          </Link>
-        </div>
-      )}
+    <section className="mt-8 max-w-7xl mx-auto p-4">
+      {/* Tabs for Admin Navigation */}
+      <div className="flex mx-auto items-center justify-center gap-2 my-4">
+        <Link
+          className={`${
+            location.pathname === "/profile" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/profile"
+        >
+          Profile
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/categories" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/categories"
+        >
+          Categories
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/items" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/items"
+        >
+          Items
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/ingredients" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/ingredients"
+        >
+          Ingredients
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/users" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/users"
+        >
+          Users
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/admin/orders" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/admin/orders"
+        >
+          Orders
+        </Link>
+      </div>
 
       {/* Item Creation Form */}
       <form
-        className="mt-8 w-1/2 mx-auto new-item-form"
+        className="mt-8 w-full md:w-2/3 lg:w-1/2 mx-auto bg-white p-6 rounded shadow-md"
         onSubmit={handleCreateItem}
       >
-        <h2 className="text-center text-primary text-4xl mb-4">
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
           Create New Item
         </h2>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <div>
-            <label className="info">Item Name</label>
+            <label
+              htmlFor="item-name"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Item Name
+            </label>
             <input
               type="text"
+              id="item-name"
               value={newItem.name}
               onChange={(e) => handleNewItemChange("name", e.target.value)}
-              className="w-full mt-1 p-2 border rounded"
+              placeholder="Enter item name"
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
-            <label className="info">Price</label>
-            <br />
+            <label
+              htmlFor="item-price"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Price ($)
+            </label>
             <input
               type="number"
-              step="0.01"
+              id="item-price"
               value={newItem.price}
               onChange={(e) => handleNewItemChange("price", e.target.value)}
-              className="w-full mt-1 p-2 border rounded"
+              placeholder="Enter price"
+              required
+              min="0.01"
+              step="0.01"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
-            <label className="info">Category</label>
-            <br />
+            <label
+              htmlFor="item-category"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Category
+            </label>
             <select
+              id="item-category"
               value={newItem.categoryId}
-              onChange={
-                (e) => handleNewItemChange("categoryId", Number(e.target.value)) // Ensure it's a number
+              onChange={(e) =>
+                handleNewItemChange("categoryId", Number(e.target.value))
               }
-              className="w-full mt-1 p-2 border rounded"
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Select Category</option>
               {categories.map((category) => (
-                <option key={category.id} value={Number(category.id)}>
+                <option
+                  key={`category-${category.id}`}
+                  value={Number(category.id)}
+                >
                   {category.name}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="info">Ingredients</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Ingredients
+            </label>
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ingredient) => (
                 <label
                   key={`ingredient-${ingredient.id}`}
-                  className="flex items-center"
+                  className="flex items-center space-x-1 text-gray-700"
                 >
                   <input
                     type="checkbox"
-                    value={Number(ingredient.id)} // Ensure it's a number
+                    value={Number(ingredient.id)}
                     checked={newItem.ingredientIds.includes(
                       Number(ingredient.id)
                     )}
                     onChange={() =>
                       handleNewItemIngredientChange(Number(ingredient.id))
                     }
-                    className="mr-1"
+                    className="form-checkbox h-5 w-5 text-primary"
                   />
-                  {ingredient.name}
+                  <span>{ingredient.name}</span>
                 </label>
               ))}
             </div>
           </div>
           <div>
-            <label className="info">Picture</label>
+            <label
+              htmlFor="item-picture"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Picture
+            </label>
             <input
               type="file"
+              id="item-picture"
               accept="image/*"
               onChange={(e) =>
                 handleNewItemChange("picture", e.target.files[0])
               }
-              className="w-full mt-1 p-2 border rounded"
+              className="w-full"
             />
           </div>
           <button
-            className="px-6 py-2 mt-2 bg-blue-500 text-white rounded hover:bg-blue-700"
             type="submit"
+            className="bg-secondary hover:bg-secondary-dark text-white px-4 py-2 rounded transition-colors duration-300"
           >
             Create Item
           </button>
         </div>
       </form>
 
-      {/* Existing Items Grid */}
+      {/* Existing Items List */}
       <div className="mt-8">
-        <h2 className="text-center text-primary text-4xl mb-4">
-          Existing Items:
+        <h2 className="text-center text-primary text-2xl font-semibold mb-4">
+          Existing Items
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white p-4 rounded shadow-md flex flex-col"
-            >
-              {/* Success Message */}
-              {item.success && (
-                <span className="text-green-600 mb-2">
-                  Updated successfully
-                </span>
-              )}
-              <div className="flex flex-col gap-2 flex-grow">
-                <div>
-                  <label className="font-semibold">Item Name</label>
-                  <input
-                    type="text"
-                    value={item.editedName}
-                    onChange={(e) =>
-                      handleItemChange(item.id, "editedName", e.target.value)
-                    }
-                    className="w-full mt-1 p-2 border rounded"
+        {items.length === 0 ? (
+          <p className="text-center text-gray-700">No items available.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white p-6 rounded shadow-md flex flex-col transition-transform transform hover:scale-105 duration-300"
+              >
+                {/* Item Image */}
+                {item.pictureUrl && (
+                  <img
+                    src={item.pictureUrl}
+                    alt={item.name}
+                    className="w-full h-32 object-cover rounded mb-4"
                   />
-                </div>
-                <div>
-                  <label className="font-semibold">Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={item.editedPrice}
-                    onChange={(e) =>
-                      handleItemChange(item.id, "editedPrice", e.target.value)
-                    }
-                    className="w-full mt-1 p-2 border rounded"
-                  />
-                </div>
-                <div>
-                  <label className="font-semibold">Category</label>
-                  <select
-                    value={item.editedCategoryId}
-                    onChange={(e) =>
-                      handleItemChange(
-                        item.id,
-                        "editedCategoryId",
-                        Number(e.target.value) // Ensure it's a number
-                      )
-                    }
-                    className="w-full mt-1 p-2 border rounded"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((category) => (
-                      <option
-                        key={`item-category-${category.id}`}
-                        value={Number(category.id)}
-                      >
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="font-semibold">Ingredients</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {ingredients.map((ingredient) => (
-                      <label
-                        key={`item-${item.id}-ingredient-${ingredient.id}`}
-                        className="flex items-center"
-                      >
-                        <input
-                          type="checkbox"
-                          value={Number(ingredient.id)} // Ensure it's a number
-                          checked={item.editedIngredientIds.includes(
-                            Number(ingredient.id)
-                          )}
-                          onChange={(e) =>
-                            handleItemIngredientChange(item.id, e)
-                          }
-                          className="mr-1"
-                        />
-                        {ingredient.name}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="font-semibold">Picture</label>
-                  {item.pictureUrl && (
-                    <img
-                      src={item.pictureUrl}
-                      alt={item.name}
-                      className="w-full h-auto mt-2"
+                )}
+
+                {/* Item Details */}
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  {editingItem === item.id ? (
+                    <input
+                      type="text"
+                      value={editedItem.name}
+                      onChange={(e) =>
+                        setEditedItem((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
                     />
+                  ) : (
+                    item.name
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleItemChange(
-                        item.id,
-                        "editedPicture",
-                        e.target.files[0]
-                      )
-                    }
-                    className="w-full mt-1 p-2 border rounded"
-                  />
+                </h3>
+                <p className="text-gray-700">
+                  <strong>Price:</strong>{" "}
+                  {editingItem === item.id ? (
+                    <input
+                      type="number"
+                      value={editedItem.price}
+                      onChange={(e) =>
+                        setEditedItem((prev) => ({
+                          ...prev,
+                          price: e.target.value,
+                        }))
+                      }
+                      className="w-24 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                      min="0.01"
+                      step="0.01"
+                    />
+                  ) : (
+                    `$${item.price.toFixed(2)}`
+                  )}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Category:</strong>{" "}
+                  {editingItem === item.id ? (
+                    <select
+                      value={editedItem.categoryId}
+                      onChange={(e) =>
+                        setEditedItem((prev) => ({
+                          ...prev,
+                          categoryId: Number(e.target.value),
+                        }))
+                      }
+                      className="w-full px-3 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((category) => (
+                        <option
+                          key={`edit-category-${category.id}`}
+                          value={Number(category.id)}
+                        >
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    categories.find((cat) => cat.id === item.categoryId)
+                      ?.name || "N/A"
+                  )}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Ingredients:</strong>{" "}
+                  {editingItem === item.id ? (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {ingredients.map((ingredient) => (
+                        <label
+                          key={`edit-item-${item.id}-ingredient-${ingredient.id}`}
+                          className="flex items-center space-x-1 text-gray-700"
+                        >
+                          <input
+                            type="checkbox"
+                            value={Number(ingredient.id)}
+                            checked={editedItem.ingredientIds.includes(
+                              Number(ingredient.id)
+                            )}
+                            onChange={() =>
+                              setEditedItem((prev) => {
+                                const ingredientIds =
+                                  prev.ingredientIds.includes(
+                                    Number(ingredient.id)
+                                  )
+                                    ? prev.ingredientIds.filter(
+                                        (id) => id !== Number(ingredient.id)
+                                      )
+                                    : [
+                                        ...prev.ingredientIds,
+                                        Number(ingredient.id),
+                                      ];
+                                return { ...prev, ingredientIds };
+                              })
+                            }
+                            className="form-checkbox h-5 w-5 text-primary"
+                          />
+                          <span>{ingredient.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    item.ingredients.map((ing) => ing.name).join(", ") || "N/A"
+                  )}
+                </p>
+
+                {/* Action Buttons */}
+                <div className="mt-auto flex justify-end space-x-2">
+                  {editingItem === item.id ? (
+                    <>
+                      <button
+                        onClick={() => handleUpdateItem(item.id)}
+                        className="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingItem(null)}
+                        className="bg-gray-500 hover:bg-gray-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleEditInitiate(item)}
+                        className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
-                <button
-                  type="button" // Prevent form submission
-                  className="px-4 py-2 bg-gray-300 text-white rounded hover:bg-gray-600"
-                  onClick={() => handleUpdateItem(item.id)}
-                >
-                  Update
-                </button>
-                <button
-                  type="button" // Prevent form submission
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
-                  onClick={() => handleDeleteItem(item.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Feedback Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalTitle}
+      >
+        <p>{modalMessage}</p>
+      </Modal>
     </section>
   );
 }
+
+export default Items;

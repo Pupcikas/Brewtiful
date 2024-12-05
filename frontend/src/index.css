@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: 'Roboto', sans-serif;
+}
+/*
 input[type="email"],
 input[type="password"],
 input[type="text"],
@@ -33,7 +37,7 @@ label.info{
   font-weight:500;
 }
 
-/* Menu.css */
+
 .menu-container {
   display: flex;
   height: 100vh;
@@ -87,7 +91,6 @@ label.info{
   background-color: #0056b3;
 }
 
-/* CartModal.css */
 .cart-modal-overlay {
   background-color: rgba(0, 0, 0, 0.75);
 }
@@ -171,3 +174,4 @@ label.info{
 .modal-actions button:last-child:hover {
   background-color: #c82333;
 }
+*/

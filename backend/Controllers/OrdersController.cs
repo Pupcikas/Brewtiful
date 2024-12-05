@@ -84,9 +84,6 @@ namespace Brewtiful.Controllers
             return Ok(new { message = "Order status updated successfully." });
         }
 
-
-
-        // POST: api/Orders/checkout
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout()
         {
@@ -97,7 +94,7 @@ namespace Brewtiful.Controllers
                 return Unauthorized(new { message = "User not authenticated." });
             }
 
-            // Fetch the user's cart
+            // Fetch the user's active cart
             var userCart = await _carts.Find(c => c.UserId == userId && c.Status == "Active").FirstOrDefaultAsync();
             if (userCart == null || userCart.Items == null || !userCart.Items.Any())
             {
@@ -115,24 +112,40 @@ namespace Brewtiful.Controllers
 
             double totalAmount = 0;
 
+            // Fetch items and ingredients to process the cart
+            var itemIds = userCart.Items.Select(ci => ci.ItemId).Distinct().ToList();
+            var items = await _items.Find(i => itemIds.Contains(i.Id)).ToListAsync();
+
+            var allIngredientIds = items.SelectMany(i => i.IngredientIds).Distinct().ToList();
+            var ingredients = await _ingredients.Find(ing => allIngredientIds.Contains(ing.Id)).ToListAsync();
+            var ingredientDict = ingredients.ToDictionary(ing => ing.Id, ing => ing);
+
+            // Process each cart item
             foreach (var cartItem in userCart.Items)
             {
-                var item = await _items.Find(i => i.Id == cartItem.ItemId).FirstOrDefaultAsync();
+                var item = items.FirstOrDefault(i => i.Id == cartItem.ItemId);
                 if (item == null)
                 {
                     return BadRequest(new { message = $"Item with ID {cartItem.ItemId} not found." });
                 }
 
-                // Fetch ingredient details
                 var ingredientDetails = new List<IngredientDetail>();
+                double itemTotal = item.Price;
+
                 foreach (var ingredientId in item.IngredientIds)
                 {
-                    var ingredient = await _ingredients.Find(ing => ing.Id == ingredientId).FirstOrDefaultAsync();
-                    if (ingredient != null)
+                    if (ingredientDict.TryGetValue(ingredientId, out var ingredient))
                     {
-                        int quantity = cartItem.IngredientQuantities.ContainsKey(ingredientId)
-                            ? cartItem.IngredientQuantities[ingredientId]
+                        // Use the actual quantities from the cart item
+                        string ingredientName = ingredient.Name;
+
+                        int quantity = cartItem.IngredientQuantities != null &&
+                                       cartItem.IngredientQuantities.ContainsKey(ingredientName)
+                            ? cartItem.IngredientQuantities[ingredientName]
                             : ingredient.DefaultQuantity;
+
+                        int extraQuantity = Math.Max(0, quantity - ingredient.DefaultQuantity);
+                        itemTotal += extraQuantity * ingredient.ExtraCost;
 
                         ingredientDetails.Add(new IngredientDetail
                         {
@@ -144,13 +157,7 @@ namespace Brewtiful.Controllers
                     }
                 }
 
-                double itemTotal = item.Price;
-                foreach (var ing in ingredientDetails)
-                {
-                    int extraQuantity = Math.Max(0, ing.Quantity - _ingredients.Find(i => i.Id == ing.IngredientId).FirstOrDefault().DefaultQuantity);
-                    itemTotal += extraQuantity * ing.ExtraCost;
-                }
-
+                // Add the processed item to the order
                 order.Items.Add(new OrderItem
                 {
                     ItemId = item.Id,
@@ -163,37 +170,112 @@ namespace Brewtiful.Controllers
                 totalAmount += itemTotal * cartItem.Quantity;
             }
 
+            // Set the total amount of the order
             order.TotalAmount = totalAmount;
 
-            // Insert the order into the database
+            // Save the order to the database
             await _orders.InsertOneAsync(order);
 
             // Update the cart status to 'CheckedOut'
-            var update = Builders<Cart>.Update.Set(c => c.Status, "CheckedOut").Set(c => c.CheckedOutAt, DateTime.UtcNow);
+            var update = Builders<Cart>.Update
+                .Set(c => c.Status, "CheckedOut")
+                .Set(c => c.CheckedOutAt, DateTime.UtcNow);
             await _carts.UpdateOneAsync(c => c.Id == userCart.Id, update);
 
             return Ok(new { message = "Checkout successful.", orderId = order.Id });
         }
 
-        // GET: api/Orders
+
+
         [HttpGet]
         [Authorize(Roles = "User")]
-        public async Task<ActionResult<List<Order>>> GetUserOrders()
+        public async Task<ActionResult<List<OrderDto>>> GetUserOrders()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return Unauthorized(new { message = "User not authenticated." });
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "User not authenticated." });
+                }
+
+                var orders = await _orders.Find(o => o.UserId == userId)
+                                          .SortByDescending(o => o.CreatedAt)
+                                          .ToListAsync();
+
+                if (!orders.Any())
+                {
+                    return Ok(new List<OrderDto>()); // Return empty list if no orders found
+                }
+
+                // Fetch items and ingredients to enrich the response
+                var itemIds = orders.SelectMany(o => o.Items.Select(i => i.ItemId)).Distinct().ToList();
+                var items = await _items.Find(i => itemIds.Contains(i.Id)).ToListAsync();
+
+                var allIngredientIds = items.SelectMany(i => i.IngredientIds).Distinct().ToList();
+                var ingredients = await _ingredients.Find(ing => allIngredientIds.Contains(ing.Id)).ToListAsync();
+                var ingredientDict = ingredients.ToDictionary(ing => ing.Id, ing => ing);
+
+                // Enrich orders with detailed information
+                var enrichedOrders = orders.Select(order =>
+                {
+                    var enrichedItems = order.Items.Select(orderItem =>
+                    {
+                        var item = items.FirstOrDefault(i => i.Id == orderItem.ItemId);
+                        if (item == null) return null;
+
+                        var enrichedIngredients = orderItem.Ingredients.Select(ing =>
+                        {
+                            if (ingredientDict.TryGetValue(ing.IngredientId, out var ingredient))
+                            {
+                                return new IngredientDetail
+                                {
+                                    IngredientId = ingredient.Id,
+                                    Name = ingredient.Name,
+                                    Quantity = ing.Quantity,
+                                    ExtraCost = ing.ExtraCost
+                                };
+                            }
+                            return ing;
+                        }).ToList();
+
+                        return new OrderItem
+                        {
+                            ItemId = item.Id,
+                            ItemName = item.Name,
+                            Ingredients = enrichedIngredients,
+                            Price = orderItem.Price,
+                            Quantity = orderItem.Quantity
+                        };
+                    }).Where(e => e != null).ToList();
+
+                    return new OrderDto
+                    {
+                        Id = order.Id,
+                        UserId = order.UserId,
+                        Status = order.Status,
+                        CreatedAt = order.CreatedAt,
+                        Items = enrichedItems,
+                        TotalAmount = order.TotalAmount
+                    };
+                }).ToList();
+
+                return Ok(enrichedOrders);
             }
-
-            var orders = await _orders.Find(o => o.UserId == userId).SortByDescending(o => o.CreatedAt).ToListAsync();
-
-            return Ok(orders);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message,
+                    Instance = HttpContext.Request.Path
+                });
+            }
         }
 
-        // GET: api/Orders/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrderById(string id)
+        public async Task<ActionResult<OrderDto>> GetOrderById(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -202,16 +284,64 @@ namespace Brewtiful.Controllers
             }
 
             var order = await _orders.Find(o => o.Id == id && o.UserId == userId).FirstOrDefaultAsync();
-
             if (order == null)
             {
                 return NotFound(new { message = "Order not found." });
             }
 
-            return Ok(order);
+            // Fetch items and ingredients to enrich the response
+            var itemIds = order.Items.Select(i => i.ItemId).Distinct().ToList();
+            var items = await _items.Find(i => itemIds.Contains(i.Id)).ToListAsync();
+
+            var allIngredientIds = items.SelectMany(i => i.IngredientIds).Distinct().ToList();
+            var ingredients = await _ingredients.Find(ing => allIngredientIds.Contains(ing.Id)).ToListAsync();
+            var ingredientDict = ingredients.ToDictionary(ing => ing.Id, ing => ing);
+
+            // Enrich the order with detailed information
+            var enrichedItems = order.Items.Select(orderItem =>
+            {
+                var item = items.FirstOrDefault(i => i.Id == orderItem.ItemId);
+                if (item == null) return null;
+
+                var enrichedIngredients = orderItem.Ingredients.Select(ing =>
+                {
+                    if (ingredientDict.TryGetValue(ing.IngredientId, out var ingredient))
+                    {
+                        return new IngredientDetail
+                        {
+                            IngredientId = ingredient.Id,
+                            Name = ingredient.Name,
+                            Quantity = ing.Quantity,
+                            ExtraCost = ing.ExtraCost
+                        };
+                    }
+                    return ing;
+                }).ToList();
+
+                return new OrderItem
+                {
+                    ItemId = item.Id,
+                    ItemName = item.Name,
+                    Ingredients = enrichedIngredients,
+                    Price = orderItem.Price,
+                    Quantity = orderItem.Quantity
+                };
+            }).Where(e => e != null).ToList();
+
+            var enrichedOrder = new OrderDto
+            {
+                Id = order.Id,
+                UserId = order.UserId,
+                Status = order.Status,
+                CreatedAt = order.CreatedAt,
+                Items = enrichedItems,
+                TotalAmount = order.TotalAmount
+            };
+
+            return Ok(enrichedOrder);
         }
 
-        // Optionally, implement endpoints to update order status (Admin only)
-        // ...
+
+
     }
 }

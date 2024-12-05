@@ -1,15 +1,21 @@
+// src/pages/Categories.js
 import React, { useEffect, useState } from "react";
 import api from "../axiosInstance";
-import monitorToken from "./monitorToken";
+import monitorToken from "../pages/monitorToken";
 import { Link, useLocation } from "react-router-dom";
+import Modal from "../components/Modal";
 
-export default function Categories() {
+function Categories() {
   const [profile, setProfile] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [items, setItems] = useState([]); // Add items state
   const [newCategory, setNewCategory] = useState({
     name: "",
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editedName, setEditedName] = useState("");
   const location = useLocation();
 
   useEffect(() => {
@@ -23,24 +29,24 @@ export default function Categories() {
         });
         setProfile(profileData);
 
-        // Fetch categories and initialize edited fields and success state
+        // Check if user is Admin
+        if (profileData.role !== "Admin") {
+          setModalMessage("You are not authorized to view this page.");
+          setModalTitle("Authorization Error");
+          setIsModalOpen(true);
+          return;
+        }
+
+        // Fetch categories
         const { data: categoriesData } = await api.get("/Category", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        const categoriesWithExtras = categoriesData.map((category) => ({
-          ...category,
-          editedName: category.name,
-          success: false,
-        }));
-        setCategories(categoriesWithExtras);
-
-        // Fetch items
-        const { data: itemsData } = await api.get("/Item", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setItems(itemsData);
+        setCategories(categoriesData);
       } catch (error) {
         console.error("Error fetching data:", error);
+        setModalMessage("Failed to fetch categories.");
+        setModalTitle("Error");
+        setIsModalOpen(true);
       }
     };
 
@@ -61,7 +67,9 @@ export default function Categories() {
 
     // Validate new category fields
     if (!newCategory.name.trim()) {
-      alert("Please enter a category name.");
+      setModalMessage("Please enter a category name.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
 
@@ -81,49 +89,39 @@ export default function Categories() {
       const { data: categoriesData } = await api.get("/Category", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      const categoriesWithExtras = categoriesData.map((category) => ({
-        ...category,
-        editedName: category.name,
-        success: false,
-      }));
-      setCategories(categoriesWithExtras);
+      setCategories(categoriesData);
 
       // Clear new category fields
       setNewCategory({
         name: "",
       });
 
-      alert("Category created successfully.");
+      setModalMessage("Category created successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error creating category:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while creating the category.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while creating the category."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
-  // Handle changes to existing categories
-  const handleCategoryChange = (index, field, value) => {
-    setCategories((prevCategories) => {
-      const updatedCategories = [...prevCategories];
-      updatedCategories[index][field] = value;
-      return updatedCategories;
-    });
+  // Handle initiating edit
+  const handleEditInitiate = (category) => {
+    setEditingCategory(category.id);
+    setEditedName(category.name);
   };
 
   // Handle updating an existing category
-  const handleUpdateCategory = async (id, index) => {
-    const category = categories[index];
-
-    // Validate category fields
-    if (!category.editedName.trim()) {
-      alert("Category name cannot be empty.");
+  const handleUpdateCategory = async (id) => {
+    if (!editedName.trim()) {
+      setModalMessage("Category name cannot be empty.");
+      setModalTitle("Validation Error");
+      setIsModalOpen(true);
       return;
     }
 
@@ -132,58 +130,38 @@ export default function Categories() {
       await api.put(
         `/Category/${id}`,
         {
-          name: category.editedName,
+          name: editedName,
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
 
-      // Update the category in the state and set success to true
-      setCategories((prevCategories) => {
-        const updatedCategories = [...prevCategories];
-        updatedCategories[index].name = category.editedName;
-        updatedCategories[index].success = true;
-        return updatedCategories;
-      });
+      // Update the category in the state
+      setCategories((prevCategories) =>
+        prevCategories.map((category) =>
+          category.id === id ? { ...category, name: editedName } : category
+        )
+      );
 
-      // Clear the success message after 3 seconds
-      setTimeout(() => {
-        setCategories((prevCategories) => {
-          const updatedCategories = [...prevCategories];
-          if (updatedCategories[index]) {
-            updatedCategories[index].success = false;
-          }
-          return updatedCategories;
-        });
-      }, 3000);
+      setModalMessage("Category updated successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
+      setEditingCategory(null);
     } catch (error) {
       console.error("Error updating category:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while updating the category.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while updating the category."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
   // Handle deleting a category
   const handleDeleteCategory = async (id) => {
-    // Fetch the number of items associated with this category
-    const associatedItems = items.filter((item) => item.categoryId === id);
-    const itemCount = associatedItems.length;
-
-    // Construct the confirmation message
-    const confirmationMessage =
-      itemCount > 0
-        ? `Deleting this category will also delete ${itemCount} associated item(s). Are you sure you want to proceed?`
-        : "Are you sure you want to delete this category?";
-
-    if (!window.confirm(confirmationMessage)) {
+    if (!window.confirm("Are you sure you want to delete this category?")) {
       return;
     }
 
@@ -197,133 +175,190 @@ export default function Categories() {
         prevCategories.filter((category) => category.id !== id)
       );
 
-      // Remove associated items from the state
-      setItems((prevItems) =>
-        prevItems.filter((item) => item.categoryId !== id)
-      );
-
-      alert("Category and associated items deleted successfully.");
+      setModalMessage("Category deleted successfully.");
+      setModalTitle("Success");
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Error deleting category:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        alert(`Error: ${error.response.data.detail}`);
-      } else if (error.response && error.response.data) {
-        alert(`Error: ${JSON.stringify(error.response.data)}`);
-      } else if (error.message) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert("An unexpected error occurred while deleting the category.");
-      }
+      setModalMessage(
+        error.response?.data?.detail ||
+          "An unexpected error occurred while deleting the category."
+      );
+      setModalTitle("Error");
+      setIsModalOpen(true);
     }
   };
 
-  if (!profile) return <div>Loading...</div>;
+  if (!profile)
+    return <div className="text-center mt-8 text-gray-700">Loading...</div>;
 
   return (
-    <section className="mt-8 max-w-7xl mx-auto">
-      {profile.role === "Admin" && (
-        <div className="flex mx-auto items-center justify-center gap-2 my-4 tabs">
-          <Link
-            className={location.pathname === "/profile" ? "active" : ""}
-            to="/profile"
-          >
-            Profile
-          </Link>
-          <Link
-            className={location.pathname === "/categories" ? "active" : ""}
-            to="/categories"
-          >
-            Categories
-          </Link>
-          <Link
-            className={location.pathname === "/items" ? "active" : ""}
-            to="/items"
-          >
-            Items
-          </Link>
-          <Link
-            className={location.pathname === "/ingredients" ? "active" : ""}
-            to="/ingredients"
-          >
-            Ingredients
-          </Link>
-          <Link
-            className={location.pathname === "/users" ? "active" : ""}
-            to="/users"
-          >
-            Users
-          </Link>
-        </div>
-      )}
+    <section className="mt-8 max-w-7xl mx-auto p-4">
+      {/* Tabs for Admin Navigation */}
+      <div className="flex mx-auto items-center justify-center gap-2 my-4">
+        <Link
+          className={`${
+            location.pathname === "/profile" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/profile"
+        >
+          Profile
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/categories" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/categories"
+        >
+          Categories
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/items" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/items"
+        >
+          Items
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/ingredients" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/ingredients"
+        >
+          Ingredients
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/users" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/users"
+        >
+          Users
+        </Link>
+        <Link
+          className={`${
+            location.pathname === "/admin/orders" ? "active" : ""
+          } px-4 py-2 bg-primary text-black rounded hover:bg-primary-dark transition-colors duration-300`}
+          to="/admin/orders"
+        >
+          Orders
+        </Link>
+      </div>
 
       {/* Category Creation Form */}
-      <form className="mt-8 w-1/2 mx-auto" onSubmit={handleCreateCategory}>
-        <h2 className="text-center text-primary text-4xl mb-4">
+      <form
+        className="mt-8 w-full md:w-1/2 mx-auto bg-white p-6 rounded shadow-md"
+        onSubmit={handleCreateCategory}
+      >
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
           Create New Category
         </h2>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <div>
-            <label className="info">Category Name</label>
+            <label
+              htmlFor="category-name"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Category Name
+            </label>
             <input
               type="text"
+              id="category-name"
               value={newCategory.name}
               onChange={(e) => handleNewCategoryChange("name", e.target.value)}
+              placeholder="Enter category name"
+              required
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
-          <button className="px-6 py-2 mt-2" type="submit">
+          <button
+            type="submit"
+            className="bg-secondary hover:bg-secondary-dark text-white px-4 py-2 rounded transition-colors duration-300"
+          >
             Create Category
           </button>
         </div>
       </form>
 
-      {/* Existing Categories Grid */}
+      {/* Existing Categories List */}
       <div className="mt-8">
-        <h2 className="text-center text-primary text-4xl mb-4">
-          Existing Categories:
+        <h2 className="text-center text-black text-2xl font-semibold mb-4">
+          Existing Categories
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
-            <div
-              key={category.id}
-              className="bg-white p-4 rounded shadow-md flex flex-col"
-            >
-              {/* Success Message */}
-              {category.success && (
-                <span className="text-green-600 mb-2">
-                  Updated successfully
-                </span>
-              )}
-              <div className="flex flex-col gap-2 flex-grow">
-                <div>
-                  <label className="font-semibold">Category Name</label>
-                  <input
-                    type="text"
-                    value={category.editedName}
-                    onChange={(e) =>
-                      handleCategoryChange(index, "editedName", e.target.value)
-                    }
-                    className="w-full mt-1 p-2 border rounded"
-                  />
+        {categories.length === 0 ? (
+          <p className="text-center text-gray-700">No categories available.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="bg-white p-6 rounded shadow-md flex flex-col transition-transform transform hover:scale-105 duration-300"
+              >
+                {/* Category Name */}
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  {editingCategory === category.id ? (
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  ) : (
+                    category.name
+                  )}
+                </h3>
+
+                {/* Action Buttons */}
+                <div className="mt-auto flex justify-end space-x-2">
+                  {editingCategory === category.id ? (
+                    <>
+                      <button
+                        onClick={() => handleUpdateCategory(category.id)}
+                        className="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingCategory(null)}
+                        className="bg-gray-500 hover:bg-gray-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleEditInitiate(category)}
+                        className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors duration-300"
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex justify-between mt-4">
-                <button
-                  className="px-4 py-2 bg-gray-300 text-white rounded hover:bg-gray-600"
-                  onClick={() => handleUpdateCategory(category.id, index)}
-                >
-                  Update
-                </button>
-                <button
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
-                  onClick={() => handleDeleteCategory(category.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Feedback Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalTitle}
+      >
+        <p>{modalMessage}</p>
+      </Modal>
     </section>
   );
 }
+
+export default Categories;

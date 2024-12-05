@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import { CartProvider } from "./pages/CartContext"; // Import the CartProvider
@@ -17,10 +18,12 @@ import logo from "./components/logo.png";
 import AdminOrders from "./pages/AdminOrders";
 import jwt_decode, { jwtDecode } from "jwt-decode";
 import background from "./components/background.png";
+import { FaBars, FaTimes, FaShoppingCart, FaUser } from "react-icons/fa";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     monitorToken();
@@ -51,195 +54,357 @@ function App() {
 
       localStorage.removeItem("token");
       setIsAuthenticated(false);
+      setUserRole(null);
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
+  // Function to toggle mobile menu
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Close menu when a link is clicked
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <CartProvider>
       <Router>
-        <div className="flex flex-col min-h-screen">
-          <header className="flex items-center justify-between shadow-md pt-2 pb-2">
-            <nav className="flex items-center gap-8 text-primary font-semibold mx-4">
-              <Link className="font-semibold text-2xl text-primary" to="/">
-                <img src={logo} alt="logo"></img>
+        <div className="flex flex-col min-h-screen font-sans">
+          {/* Header */}
+          <header className="bg-primary text-black shadow-lg">
+            <div className="container mx-auto flex items-center justify-between p-4">
+              <Link
+                to="/"
+                className="flex items-center space-x-2"
+                onClick={closeMenu}
+              >
+                <img src={logo} alt="logo" className="h-8 w-auto" />
               </Link>
-              <Link to="/">Home</Link>
-              {userRole === "User" && <Link to="/menu">Menu</Link>}
-              <Link to="/about">About</Link>
-            </nav>
-            <nav className="flex items-center gap-4 text-primary font-semibold mx-4">
-              {isAuthenticated ? (
-                <>
-                  {userRole === "User" && <Link to="/orders">Orders</Link>}
-                  <Link to="/profile">Profile</Link>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-primary rounded text-white px-6 py-2"
-                  >
-                    Logout
-                  </button>
-                  {userRole === "User" && (
-                    <Link to="/cart">
-                      <div className="flex justify-center items-center">
-                        <div className="relative py-2">
-                          <div className="t-0 absolute left-3">
-                            <p className="flex h-2 w-2 items-center justify-center rounded-full bg-red-500 p-3 text-xs text-white">
-                              {/* Cart Count */}
-                            </p>
-                          </div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="file: mt-4 h-6 w-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link to="/login">Login</Link>
+              {/* Desktop Menu */}
+              <nav className="hidden md:flex space-x-6">
+                <Link
+                  to="/"
+                  className="hover:text-secondary transition-colors duration-300"
+                >
+                  Home
+                </Link>
+                {userRole === "User" && (
                   <Link
-                    to="/register"
-                    className="bg-primary rounded text-white px-6 py-2"
+                    to="/menu"
+                    className="hover:text-secondary transition-colors duration-300"
                   >
-                    Register
+                    Menu
                   </Link>
-                </>
-              )}
-            </nav>
+                )}
+                <Link
+                  to="/about"
+                  className="hover:text-secondary transition-colors duration-300"
+                >
+                  About
+                </Link>
+              </nav>
+              {/* User Actions */}
+              <nav className="hidden md:flex items-center space-x-4">
+                {isAuthenticated ? (
+                  <>
+                    {userRole === "User" && (
+                      <Link
+                        to="/orders"
+                        className="hover:text-secondary transition-colors duration-300"
+                      >
+                        Orders
+                      </Link>
+                    )}
+                    <Link
+                      to="/profile"
+                      className="flex items-center space-x-1 hover:text-secondary transition-colors duration-300"
+                    >
+                      <FaUser />
+                      <span>Profile</span>
+                    </Link>
+                    {userRole === "User" && (
+                      <Link
+                        to="/cart"
+                        className="flex items-center space-x-1 hover:text-secondary transition-colors duration-300"
+                      >
+                        <FaShoppingCart />
+                        <span>Cart</span>
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="bg-secondary hover:bg-secondary-dark transition-colors duration-300 text-white px-4 py-2 rounded"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="hover:text-secondary transition-colors duration-300"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="bg-secondary hover:bg-secondary-dark transition-colors duration-300 text-primary px-4 py-2 rounded"
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
+              </nav>
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button onClick={toggleMenu} aria-label="Toggle Menu">
+                  {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+                </button>
+              </div>
+            </div>
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+              <nav className="md:hidden bg-primary text-black">
+                <ul className="flex flex-col space-y-2 p-4">
+                  <li>
+                    <Link
+                      to="/"
+                      onClick={closeMenu}
+                      className="hover:text-secondary transition-colors duration-300"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  {userRole === "User" && (
+                    <li>
+                      <Link
+                        to="/menu"
+                        onClick={closeMenu}
+                        className="hover:text-secondary transition-colors duration-300"
+                      >
+                        Menu
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <Link
+                      to="/about"
+                      onClick={closeMenu}
+                      className="hover:text-secondary transition-colors duration-300"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  {isAuthenticated ? (
+                    <>
+                      {userRole === "User" && (
+                        <li>
+                          <Link
+                            to="/orders"
+                            onClick={closeMenu}
+                            className="hover:text-secondary transition-colors duration-300"
+                          >
+                            Orders
+                          </Link>
+                        </li>
+                      )}
+                      <li>
+                        <Link
+                          to="/profile"
+                          onClick={closeMenu}
+                          className="hover:text-secondary transition-colors duration-300"
+                        >
+                          Profile
+                        </Link>
+                      </li>
+                      {userRole === "User" && (
+                        <li>
+                          <Link
+                            to="/cart"
+                            onClick={closeMenu}
+                            className="hover:text-secondary transition-colors duration-300"
+                          >
+                            Cart
+                          </Link>
+                        </li>
+                      )}
+                      <li>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            closeMenu();
+                          }}
+                          className="w-full text-left !text-white hover:text-secondary transition-colors duration-300"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        <Link
+                          to="/login"
+                          onClick={closeMenu}
+                          className="hover:text-secondary transition-colors duration-300"
+                        >
+                          Login
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/register"
+                          onClick={closeMenu}
+                          className="bg-secondary hover:bg-secondary-dark transition-colors duration-300 text-black px-4 py-2 rounded"
+                        >
+                          Register
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </nav>
+            )}
           </header>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <section className="items-center">
-                  <div
-                    style={{
-                      backgroundImage: `url(${background})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      height: "90vh",
-                      width: "100%",
-                    }}
-                  ></div>
-                </section>
-              }
-            />
-            <Route path="/about" element={<About />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route
-              path="/login"
-              element={<Login setIsAuthenticated={setIsAuthenticated} />}
-            />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/profile/*"
-              element={
-                isAuthenticated ? (
-                  <Profile />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      Please login to view your profile.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/categories"
-              element={
-                isAuthenticated ? (
-                  <Categories />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      You do not have permission to view this page.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/items"
-              element={
-                isAuthenticated ? (
-                  <Items />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      You do not have permission to view this page.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/ingredients"
-              element={
-                isAuthenticated ? (
-                  <Ingredients />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      You do not have permission to view this page.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                isAuthenticated ? (
-                  <Users />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      You do not have permission to view this page.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                isAuthenticated ? (
-                  <Orders />
-                ) : (
-                  <div>
-                    <h1 className="font-bold text-red-700">
-                      You do not have permission to view this page.
-                    </h1>
-                  </div>
-                )
-              }
-            />
-          </Routes>
-          <footer
-            style={{ boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.1)" }}
-            className="primary py-4 mt-auto"
-          >
-            <div className="container mx-auto text-center">
+
+          {/* Main Content */}
+          <main className="flex-grow bg-background p-6">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <section className="flex items-center justify-center">
+                    <div
+                      style={{
+                        backgroundImage: `url(${background})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        height: "90vh",
+                        width: "100%",
+                      }}
+                      className="flex items-center justify-center bg-opacity-50"
+                    ></div>
+                  </section>
+                }
+              />
+              <Route path="/about" element={<About />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route
+                path="/login"
+                element={<Login setIsAuthenticated={setIsAuthenticated} />}
+              />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/profile/*"
+                element={
+                  isAuthenticated ? (
+                    <Profile />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        Please login to view your profile.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+              <Route
+                path="/categories"
+                element={
+                  isAuthenticated ? (
+                    <Categories />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        You do not have permission to view this page.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+              <Route
+                path="/items"
+                element={
+                  isAuthenticated ? (
+                    <Items />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        You do not have permission to view this page.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+              <Route
+                path="/ingredients"
+                element={
+                  isAuthenticated ? (
+                    <Ingredients />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        You do not have permission to view this page.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  isAuthenticated ? (
+                    <Users />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        You do not have permission to view this page.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  isAuthenticated ? (
+                    <Orders />
+                  ) : (
+                    <div className="text-center mt-8 text-red-500">
+                      <h1 className="font-bold">
+                        You do not have permission to view this page.
+                      </h1>
+                    </div>
+                  )
+                }
+              />
+            </Routes>
+          </main>
+
+          {/* Footer */}
+          <footer className="bg-primary text-black text-center py-4 shadow-inner">
+            <div className="container mx-auto">
               <p className="text-sm">
                 © 2024 Brewtiful - Domas Gladkauskas IFK-2.
               </p>
+              {/* Optional Social Icons */}
+              <div className="flex justify-center space-x-4 mt-2">
+                <a
+                  href="https://github.com/Pupcikas/Brewtiful"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-secondary transition-colors duration-300"
+                >
+                  <FaUser size={20} />
+                </a>
+                {/* Add more social icons as needed */}
+              </div>
             </div>
           </footer>
         </div>
@@ -247,5 +412,4 @@ function App() {
     </CartProvider>
   );
 }
-
 export default App;
