@@ -22,15 +22,28 @@ namespace Brewtiful.Controllers
         }
 
         // GET: api/Ingredient
-        [Authorize(Roles = "Admin,User")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public ActionResult<List<Ingredient>> Get()
         {
-            return _ingredients.Find(ingredient => true).ToList();
+            try
+            {
+                return _ingredients.Find(ingredient => true).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (implement logging as needed)
+                return StatusCode(500, new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                });
+            }
         }
 
         // GET: api/Ingredient/{id}
-        [Authorize(Roles = "Admin,User")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public ActionResult<Ingredient> Get(int id)
         {

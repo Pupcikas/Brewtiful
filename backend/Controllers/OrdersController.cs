@@ -31,6 +31,61 @@ namespace Brewtiful.Controllers
             _users = database.GetCollection<User>("Users");
         }
 
+        // Controllers/OrdersController.cs
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<List<Order>>> GetAllOrders([FromQuery] string status = null)
+        {
+            // If a status is provided, filter by status
+            if (!string.IsNullOrEmpty(status))
+            {
+                // Try to parse the status string to the OrderStatus enum
+                if (!Enum.TryParse<OrderStatus>(status, true, out var parsedStatus))
+                {
+                    return BadRequest(new { message = "Invalid status value." });
+                }
+
+                var orders = await _orders.Find(o => o.Status == parsedStatus)
+                                          .SortByDescending(o => o.CreatedAt)
+                                          .ToListAsync();
+                return Ok(orders);
+            }
+            else
+            {
+                // If no status is provided, return all orders
+                var orders = await _orders.Find(_ => true)
+                                          .SortByDescending(o => o.CreatedAt)
+                                          .ToListAsync();
+                return Ok(orders);
+            }
+        }
+
+
+        [HttpPut("{id}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateOrderStatus(string id, [FromBody] UpdateOrderStatusModel updateModel)
+        {
+            if (!Enum.TryParse<OrderStatus>(updateModel.Status, true, out var newStatus))
+            {
+                return BadRequest(new { message = "Invalid status value." });
+            }
+
+            var update = Builders<Order>.Update
+                .Set(o => o.Status, newStatus)
+                .Set(o => o.UpdatedAt, DateTime.UtcNow);
+
+            var result = await _orders.UpdateOneAsync(o => o.Id == id, update);
+
+            if (result.MatchedCount == 0)
+            {
+                return NotFound(new { message = "Order not found." });
+            }
+
+            return Ok(new { message = "Order status updated successfully." });
+        }
+
+
+
         // POST: api/Orders/checkout
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout()
@@ -122,6 +177,7 @@ namespace Brewtiful.Controllers
 
         // GET: api/Orders
         [HttpGet]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<List<Order>>> GetUserOrders()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

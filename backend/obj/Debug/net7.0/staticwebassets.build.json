@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "PL+qKjNma2beL4jQ2znZRC5/oBdVBSIKtoDK1yqqMW4=",
+  "Hash": "rZm7ibnA9gA+eXKyMtq/IkHMRjDRyXYEmhM5hksM77U=",
   "Source": "Brewtiful",
   "BasePath": "_content/Brewtiful",
   "Mode": "Default",
@@ -16,6 +16,23 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg",
+      "SourceId": "Brewtiful",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "BasePath": "_content/Brewtiful",
+      "RelativePath": "images/items/9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\items\\9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg"
+    },
     {
       "Identity": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
       "SourceId": "Brewtiful",

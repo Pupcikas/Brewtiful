@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Http;
 using FluentValidation;
+using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -91,6 +92,12 @@ namespace Brewtiful
                 return client.GetDatabase(databaseName);
             });
 
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
+
 
             // Enable HTTP Context Access to use session in controllers
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -122,6 +129,18 @@ namespace Brewtiful
             {
                 endpoints.MapControllers(); // Map controller routes to handle API requests
             });
+
+            // In Startup.cs or Program.cs
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
+
         }
     }
 }

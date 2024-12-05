@@ -65,8 +65,8 @@ function Profile() {
             Users
           </Link>
           <Link
-            className={location.pathname === "/orders" ? "active" : ""}
-            to="/orders"
+            className={location.pathname === "/admin/orders" ? "active" : ""}
+            to="/admin/orders"
           >
             Orders
           </Link>

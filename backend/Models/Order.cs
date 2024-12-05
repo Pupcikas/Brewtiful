@@ -1,11 +1,13 @@
 // Models/Order.cs
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 using System;
 using System.Collections.Generic;
 
 namespace Brewtiful.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum OrderStatus
     {
         Pending,

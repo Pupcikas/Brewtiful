@@ -29,6 +29,7 @@ namespace Brewtiful.Controllers
 
         // GET: api/Cart
         [HttpGet]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<CartDto>> GetCart()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -111,6 +112,7 @@ namespace Brewtiful.Controllers
 
         // POST: api/Cart/add
         [HttpPost("add")]
+        [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> AddToCart([FromBody] CartItemDto cartItemDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

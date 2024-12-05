@@ -14,15 +14,32 @@ import Menu from "./pages/Menu";
 import Cart from "./pages/Cart"; // Import Cart Page
 import monitorToken from "./pages/monitorToken";
 import logo from "./components/logo.png";
+import AdminOrders from "./pages/AdminOrders";
+import jwt_decode, { jwtDecode } from "jwt-decode";
 import background from "./components/background.png";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     monitorToken();
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
+    if (token) {
+      setIsAuthenticated(true);
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserRole(decodedToken.role); // Assuming the token has a 'role' claim
+      } catch (error) {
+        console.error("Failed to decode token:", error);
+        setUserRole(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem("token");
+      }
+    } else {
+      setIsAuthenticated(false);
+      setUserRole(null);
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -49,13 +66,13 @@ function App() {
                 <img src={logo} alt="logo"></img>
               </Link>
               <Link to="/">Home</Link>
-              <Link to="/menu">Menu</Link>
+              {userRole === "User" && <Link to="/menu">Menu</Link>}
               <Link to="/about">About</Link>
             </nav>
             <nav className="flex items-center gap-4 text-primary font-semibold mx-4">
               {isAuthenticated ? (
                 <>
-                  <Link to="/orders">Orders</Link>
+                  {userRole === "User" && <Link to="/orders">Orders</Link>}
                   <Link to="/profile">Profile</Link>
                   <button
                     onClick={handleLogout}
@@ -63,31 +80,33 @@ function App() {
                   >
                     Logout
                   </button>
-                  <Link to="/cart">
-                    <div className="flex justify-center items-center">
-                      <div className="relative py-2">
-                        <div className="t-0 absolute left-3">
-                          <p className="flex h-2 w-2 items-center justify-center rounded-full bg-red-500 p-3 text-xs text-white">
-                            {/* Cart Count */}
-                          </p>
+                  {userRole === "User" && (
+                    <Link to="/cart">
+                      <div className="flex justify-center items-center">
+                        <div className="relative py-2">
+                          <div className="t-0 absolute left-3">
+                            <p className="flex h-2 w-2 items-center justify-center rounded-full bg-red-500 p-3 text-xs text-white">
+                              {/* Cart Count */}
+                            </p>
+                          </div>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="file: mt-4 h-6 w-6"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+                            />
+                          </svg>
                         </div>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="file: mt-4 h-6 w-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                          />
-                        </svg>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  )}
                 </>
               ) : (
                 <>
@@ -122,6 +141,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/menu" element={<Menu />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
             <Route
               path="/login"
               element={<Login setIsAuthenticated={setIsAuthenticated} />}
