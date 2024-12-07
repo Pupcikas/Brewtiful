@@ -8,7 +8,7 @@ Projekto tikslas - sukurti puslapį, kuris būtų skirtas užsisakyti gėrimus i
 Veikimo principas – kuriamą sistemą sudaro dvi dalys: internetinis puslapis, kuriuo
 naudosis svečiai, vartotojai, administratorius bei aplikacijų programavimo sąsaja (API).
 
-Svečias atėjęs į svetainę galės naršyti per svetainę ir pamatyti meniu, kokius produktus galima įsigyti parduotuvėje. Norint užsisakyti gėrimus, svečias turės prisiregistruoti ir tada galės pateikti užsakymą. Taip pat, darant užsakymą jei bus pasirinkimas, bus galima keisti gėrimo sudėti, bei po kiekvieno užsakymo rinkti taškus, kuriuos bus galima iškeisti į nemokamą gėrimą. Administratoriai moderuos svetaine, patvirtins gėrimų užsakymus, matys ataskaitas susijusias su užsakymais.
+Svečias atėjęs į svetainę galės naršyti per svetainę ir pamatyti meniu, kokius produktus galima įsigyti parduotuvėje. Norint užsisakyti gėrimus, svečias turės prisiregistruoti ir tada galės pateikti užsakymą. Taip pat, darant užsakymą jei bus pasirinkimas, bus galima keisti gėrimo sudėti. Administratoriai moderuos svetaine, patvirtins gėrimų užsakymus, matys ataskaitas susijusias su užsakymais.
 ### 1.2 Funkciniai reikalavimai
 
 Svečias galės:
@@ -21,9 +21,10 @@ Prisijungęs vartotojas galės:
 1. Užsisakyti gėrimus.
 2. Keisti gėrimų sudėti.
 3. Modifikuoti užsakymų krepšelį.
-4. Kaupti taškus nemokamui gėrimui.
-5. Atsijungti.
-6. Prisijungti
+4. Atsijungti.
+5. Prisijungti.
+6. Matyti savo duomenis profilyje.
+7. Matyti užsakymų istorija bei būseną.
 
 Administratorius galės:
 
@@ -33,6 +34,8 @@ Administratorius galės:
 4. Kurti naujus produktus.
 5. Modifikuoti produktus.
 6. Ištrinti produktus.
+7. Ištrinti vartotojus, keisti jų informaciją bei matyti jų sąrašą.
+8. Keisti užsakymų būsenas.
 
 ## 2. Sistemos architektūra
 
