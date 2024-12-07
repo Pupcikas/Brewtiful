@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "rZm7ibnA9gA+eXKyMtq/IkHMRjDRyXYEmhM5hksM77U=",
+  "Hash": "ZYPtEfHa+YK6I5F/jml0O+qLP9blA09V4M6ra3QmmOE=",
   "Source": "Brewtiful",
   "BasePath": "_content/Brewtiful",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "Brewtiful\\wwwroot",
       "Source": "Brewtiful",
-      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\wwwroot\\",
       "BasePath": "_content/Brewtiful",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg",
+      "Identity": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg",
       "SourceId": "Brewtiful",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\wwwroot\\",
       "BasePath": "_content/Brewtiful",
       "RelativePath": "images/items/9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg",
       "AssetKind": "All",
@@ -34,10 +34,10 @@
       "OriginalItemSpec": "wwwroot\\images\\items\\9ce5462f-878b-41fd-881e-cd2f444e6aba_Laptop-Wallpaper-Aesthetic-Wallpaper-Hand-Art.jpg"
     },
     {
-      "Identity": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
+      "Identity": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\wwwroot\\images\\items\\d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
       "SourceId": "Brewtiful",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\wwwroot\\",
       "BasePath": "_content/Brewtiful",
       "RelativePath": "images/items/d9c1a774-273c-45c3-8cb9-90d0f7e1d891_Screenshot 2024-11-24 141546.png",
       "AssetKind": "All",
