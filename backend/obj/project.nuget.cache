@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/L6MdGXx0Hc=",
+  "dgSpecHash": "iDfwTiHI7vk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\Brewtiful.csproj",
+  "projectFilePath": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\Brewtiful.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Domas\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\Domas\\.nuget\\packages\\dnsclient\\1.4.0\\dnsclient.1.4.0.nupkg.sha512",

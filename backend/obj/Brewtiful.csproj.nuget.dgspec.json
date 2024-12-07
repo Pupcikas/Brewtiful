@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\Brewtiful.csproj": {}
+    "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\Brewtiful.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\Brewtiful.csproj": {
+    "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\Brewtiful.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\Brewtiful.csproj",
+        "projectUniqueName": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\Brewtiful.csproj",
         "projectName": "Brewtiful",
-        "projectPath": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\Brewtiful.csproj",
+        "projectPath": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\Brewtiful.csproj",
         "packagesPath": "C:\\Users\\Domas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Domas\\Desktop\\5 semestras\\Brewtiful\\backend\\obj\\",
+        "outputPath": "C:\\Users\\Domas\\Desktop\\5semestras\\Brewtiful\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Domas\\AppData\\Roaming\\NuGet\\NuGet.Config",
