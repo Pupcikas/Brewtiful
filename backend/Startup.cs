@@ -13,6 +13,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.FileProviders;
+
 
 namespace Brewtiful
 {
@@ -28,6 +32,23 @@ namespace Brewtiful
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Retrieve certificate path and password from environment variables for security
+            var certPath = Configuration["DPCERT_PATH"];
+            var certPassword = Configuration["DPCERT_PASSWORD"];
+
+            if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPassword))
+            {
+                throw new InvalidOperationException("Data Protection certificate path or password is not configured.");
+            }
+
+            // Load the certificate
+            var certificate = new X509Certificate2(certPath, certPassword);
+
+            // Configure Data Protection
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"))
+                .ProtectKeysWithCertificate(certificate);
+
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
             var key = Encoding.UTF8.GetBytes(jwtSettings.Key);
