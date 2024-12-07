@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 WORKDIR /App
 
-COPY 5semestras/Brewtiful/backend .
+COPY Brewtiful/backend .
 
 RUN dotnet restore
 
