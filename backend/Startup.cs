@@ -34,7 +34,7 @@ namespace Brewtiful
         {
 
             // Load the certificate
-            var certificate = new X509Certificate2("/App/Certs", "YourStrongPassword");
+            var certificate = new X509Certificate2("/App/Sert", "YourStrongPassword");
 
             // Configure Data Protection
             services.AddDataProtection()

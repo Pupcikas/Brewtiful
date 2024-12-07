@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Brewtiful")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b143223fceb3fb0c3e2fd4b877890ffb508872cd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+839d2ae852381ebd1e8dabf0b5e58bf18d3b34fb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Brewtiful")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Brewtiful")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
