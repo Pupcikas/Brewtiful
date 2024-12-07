@@ -33,8 +33,8 @@ namespace Brewtiful
         public void ConfigureServices(IServiceCollection services)
         {
             // Retrieve certificate path and password from environment variables for security
-            var certPath = Configuration["DPCERT_PATH"];
-            var certPassword = Configuration["DPCERT_PASSWORD"];
+            var certPath = Configuration["C:/Users/Domas/Desktop/Cert"];
+            var certPassword = Configuration["YourStrongPassword"];
 
             if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPassword))
             {
