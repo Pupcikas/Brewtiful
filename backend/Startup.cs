@@ -34,12 +34,12 @@ namespace Brewtiful
         {
 
             // Load the certificate
-            var certificate = new X509Certificate2("/App/Sert", "YourStrongPassword");
+            /*     var certificate = new X509Certificate2("/App/Sert", "YourStrongPassword");
 
-            // Configure Data Protection
-            services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["/App/DataProtection-Keys"] ?? "/App/DataProtection-Keys"))
-                    .ProtectKeysWithCertificate(certificate);
+                 // Configure Data Protection
+                 services.AddDataProtection()
+                     .PersistKeysToFileSystem(new DirectoryInfo(Configuration["/App/DataProtection-Keys"] ?? "/App/DataProtection-Keys"))
+                         .ProtectKeysWithCertificate(certificate);*/
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();

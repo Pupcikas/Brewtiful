@@ -13,10 +13,17 @@ namespace Brewtiful
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+                    Host.CreateDefaultBuilder(args)
+                        .ConfigureWebHostDefaults(webBuilder =>
+                        {
+                            webBuilder.ConfigureKestrel(serverOptions =>
+                            {
+                                // Read the PORT environment variable, default to 8080 if not set
+                                var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+                                serverOptions.ListenAnyIP(int.Parse(port));
+                            })
+                            .UseStartup<Startup>();
+                        });
     }
+
 }
