@@ -32,21 +32,13 @@ namespace Brewtiful
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Retrieve certificate path and password from environment variables for security
-            var certPath = Configuration["DataProtection:CertificatePath"];
-            var certPassword = Configuration["DataProtection:CertificatePassword"];
-
-            //     if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPassword))
-            //      {
-            //        throw new InvalidOperationException("Data Protection certificate path or password is not configured.");
-            //     }
 
             // Load the certificate
-            var certificate = new X509Certificate2(certPath, certPassword);
+            var certificate = new X509Certificate2("dp_cert.pfx", "YourStrongPassword");
 
             // Configure Data Protection
             services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DataProtection:KeysPath"] ?? "/App/DataProtection-Keys"))
+                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["/App/DataProtection-Keys"] ?? "/App/DataProtection-Keys"))
                     .ProtectKeysWithCertificate(certificate);
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
