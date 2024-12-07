@@ -45,9 +45,9 @@ namespace Brewtiful
             //     var certificate = new X509Certificate2(certPath, certPassword);
 
             // Configure Data Protection
-            //       services.AddDataProtection()
-            //          .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"))
-            //           .ProtectKeysWithCertificate(certificate);
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"));
+            //        .ProtectKeysWithCertificate(certificate);
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
