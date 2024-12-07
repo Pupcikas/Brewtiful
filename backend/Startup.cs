@@ -33,8 +33,8 @@ namespace Brewtiful
         public void ConfigureServices(IServiceCollection services)
         {
             // Retrieve certificate path and password from environment variables for security
-            //  var certPath = Configuration["DataProtection:CertificatePath"];
-            //    var certPassword = Configuration["DataProtection:CertificatePassword"];
+            var certPath = Configuration["DataProtection:CertificatePath"];
+            var certPassword = Configuration["DataProtection:CertificatePassword"];
 
             //     if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPassword))
             //      {
@@ -42,13 +42,12 @@ namespace Brewtiful
             //     }
 
             // Load the certificate
-            //     var certificate = new X509Certificate2(certPath, certPassword);
+            var certificate = new X509Certificate2(certPath, certPassword);
 
             // Configure Data Protection
             services.AddDataProtection()
                 .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"))
-                .ProtectKeysWithDpapi();
-            //        .ProtectKeysWithCertificate(certificate);
+                    .ProtectKeysWithCertificate(certificate);
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
