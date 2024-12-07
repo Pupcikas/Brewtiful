@@ -46,7 +46,8 @@ namespace Brewtiful
 
             // Configure Data Protection
             services.AddDataProtection()
-                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"));
+                .PersistKeysToFileSystem(new DirectoryInfo(Configuration["DP_KEYS_PATH"] ?? "/App/DataProtection-Keys"))
+                .ProtectKeysWithDpapi();
             //        .ProtectKeysWithCertificate(certificate);
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
