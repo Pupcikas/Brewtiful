@@ -1,6 +1,6 @@
 {
   "name": "auth-frontend",
-  "proxy": "http://localhost:5000",
+  "proxy": "https://woven-ceremony-440709-s5.lm.r.appspot.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,19 +16,20 @@
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.6",
     "react-dom": "^18.3.1",
-    "react-flying-item": "^1.1.3",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^5.4.0",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "tailwindcss -i ./src/input.css -o ./public/style.css --watch",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+"scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "postbuild": "tailwindcss -i ./src/input.css -o ./src/tailwind.css --minify",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
+
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -48,6 +49,8 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.14"
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16"
   }
 }

@@ -16,7 +16,7 @@ function Login({ setIsAuthenticated }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://woven-ceremony-440709-s5.lm.r.appspot.com/api/auth/login",
         { email, password },
         { withCredentials: true }
       );

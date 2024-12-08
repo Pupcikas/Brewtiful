@@ -33,13 +33,6 @@ namespace Brewtiful
         public void ConfigureServices(IServiceCollection services)
         {
 
-            // Load the certificate
-            /*     var certificate = new X509Certificate2("/App/Sert", "YourStrongPassword");
-
-                 // Configure Data Protection
-                 services.AddDataProtection()
-                     .PersistKeysToFileSystem(new DirectoryInfo(Configuration["/App/DataProtection-Keys"] ?? "/App/DataProtection-Keys"))
-                         .ProtectKeysWithCertificate(certificate);*/
 
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
             var jwtSettings = Configuration.GetSection("Jwt").Get<JwtSettings>();
@@ -49,7 +42,7 @@ namespace Brewtiful
             {
                 options.AddPolicy("AllowFrontend",
                  builder => builder
-                .WithOrigins("http://localhost:3000") // Replace with your frontend's origin
+                .WithOrigins("https://brewtiful-84d52.web.app") // Replace with your frontend's origin
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials());

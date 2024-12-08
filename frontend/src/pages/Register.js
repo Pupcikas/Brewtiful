@@ -17,7 +17,7 @@ function Register() {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "https://woven-ceremony-440709-s5.lm.r.appspot.com/api/auth/register",
         { email, password, username, name }
       );
       setMessage("Registration successful. Please log in.");

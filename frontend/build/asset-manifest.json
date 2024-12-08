@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.cf5e7907.css",
+    "main.js": "/static/js/main.0c822855.js",
+    "static/media/background.png": "/static/media/background.41872702e3155d2f90a2.png",
+    "static/media/Recoleta-RegularDEMO.otf": "/static/media/Recoleta-RegularDEMO.fd9bfd35d1085b5c6511.otf",
+    "static/media/logo.png": "/static/media/logo.d8d2c752c72a2a979e0a.png",
+    "index.html": "/index.html",
+    "main.cf5e7907.css.map": "/static/css/main.cf5e7907.css.map",
+    "main.0c822855.js.map": "/static/js/main.0c822855.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.cf5e7907.css",
+    "static/js/main.0c822855.js"
+  ]
+}
