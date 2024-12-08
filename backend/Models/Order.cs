@@ -12,6 +12,7 @@ namespace Brewtiful.Models
     {
         Pending,
         Processing,
+        Ready,
         Completed,
         Cancelled
     }

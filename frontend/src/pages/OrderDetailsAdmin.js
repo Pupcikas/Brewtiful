@@ -144,6 +144,7 @@ function OrderDetailsAdmin() {
           >
             <option value="Pending">Pending</option>
             <option value="Processing">Processing</option>
+            <option value="Ready">Ready</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
           </select>

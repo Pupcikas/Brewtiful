@@ -82,10 +82,10 @@ function App() {
                 className="flex items-center space-x-2"
                 onClick={closeMenu}
               >
-                <img src={logo} alt="logo" className="h-8 w-auto" />
+                <img src={logo} alt="logo" className="h-10 w-auto px-4" />
               </Link>
               {/* Desktop Menu */}
-              <nav className="hidden md:flex space-x-6">
+              <nav className="hidden md:flex space-x-6 text-2xl">
                 <Link
                   to="/"
                   className="hover:text-secondary transition-colors duration-300"
@@ -108,7 +108,7 @@ function App() {
                 </Link>
               </nav>
               {/* User Actions */}
-              <nav className="hidden md:flex items-center space-x-4">
+              <nav className="hidden md:flex items-center space-x-4 text-2xl">
                 {isAuthenticated ? (
                   <>
                     {userRole === "User" && (
@@ -283,10 +283,10 @@ function App() {
                         backgroundImage: `url(${background})`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
-                        height: "90vh",
+                        height: "76vh",
                         width: "100%",
                       }}
-                      className="flex items-center justify-center bg-opacity-50"
+                      className="bg-cover md:bg-contain bg-center h-[76vh] w-full transition-all duration-300"
                     ></div>
                   </section>
                 }
@@ -388,7 +388,7 @@ function App() {
           </main>
 
           {/* Footer */}
-          <footer className="bg-primary text-black text-center py-4 shadow-inner">
+          <footer className="bg-primary text-gray-400 text-center py-4 shadow-inner">
             <div className="container mx-auto">
               <p className="text-sm">
                 2024 Brewtiful - Domas Gladkauskas IFK-2.

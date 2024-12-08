@@ -451,26 +451,6 @@ function Items() {
               ))}
             </div>
           </div>
-          <div>
-            <label
-              htmlFor="item-picture"
-              className="block text-gray-700 font-medium mb-2"
-            >
-              Picture{" "}
-              <span className="mr-4 font-bold text-black underline hover:cursor-pointer">
-                {fileLabel}
-              </span>
-            </label>
-            <input
-              type="file"
-              id="item-picture"
-              accept="image/*"
-              onChange={(e) =>
-                handleNewItemChange("picture", e.target.files[0])
-              }
-              className="hidden"
-            />
-          </div>
           <button
             type="submit"
             className="bg-secondary hover:bg-secondary-dark text-white px-4 py-2 rounded transition-colors duration-300"
@@ -494,15 +474,6 @@ function Items() {
                 key={item.id}
                 className="bg-white p-6 rounded shadow-md flex flex-col transition-transform transform hover:scale-105 duration-300"
               >
-                {/* Item Image */}
-                {item.pictureUrl && (
-                  <img
-                    src={item.pictureUrl}
-                    alt={item.name}
-                    className="w-full h-32 object-cover rounded mb-4"
-                  />
-                )}
-
                 {/* Item Details */}
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
                   {editingItem === item.id ? (
