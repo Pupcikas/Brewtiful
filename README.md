@@ -1,3 +1,5 @@
+Projekto ataskaita pdf formatu: [IFK-2_Domas_Gladkauskas.pdf](https://github.com/user-attachments/files/18053842/IFK-2_Domas_Gladkauskas.pdf)
+
 # Brewtiful
 ## 1. Sprendžiamo uždavinio aprašymas
 
