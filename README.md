@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/971c5c7a-5f32-4ce8-bed0-c86436008853)# Brewtiful
+# Brewtiful
 ## 1. Sprendžiamo uždavinio aprašymas
 
 ### 1.1 Sistemos paskirtis
