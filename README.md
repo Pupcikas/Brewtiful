@@ -8,12 +8,12 @@ Projekto tikslas - sukurti puslapį, kuris būtų skirtas užsisakyti gėrimus i
 Veikimo principas – kuriamą sistemą sudaro dvi dalys: internetinis puslapis, kuriuo
 naudosis svečiai, vartotojai, administratorius bei aplikacijų programavimo sąsaja (API).
 
-Svečias atėjęs į svetainę galės naršyti per svetainę ir pamatyti meniu, kokius produktus galima įsigyti parduotuvėje. Norint užsisakyti gėrimus, svečias turės prisiregistruoti ir tada galės pateikti užsakymą. Taip pat, darant užsakymą jei bus pasirinkimas, bus galima keisti gėrimo sudėti. Administratoriai moderuos svetaine, patvirtins gėrimų užsakymus, matys ataskaitas susijusias su užsakymais.
+Svečias atėjęs į svetainę galės naršyti per svetainę ir pamatyti meniu, kokius produktus galima įsigyti parduotuvėje. Norint užsisakyti gėrimus, svečias turės prisiregistruoti ir tada galės pateikti užsakymą. Taip pat, darant užsakymą jei bus pasirinkimas, bus galima keisti gėrimo sudėti. Administratoriai moderuos svetaine, patvirtins gėrimų užsakymus, matys informaciją susijusią su užsakymais.
 ### 1.2 Funkciniai reikalavimai
 
 Svečias galės:
 
-1. Peržiūrėti kategorijų sąrašą.
+1. Peržiūrėti pradinį puslapį, puslapį "About"
 2. Užsiregistruoti.
 
 Prisijungęs vartotojas galės:
