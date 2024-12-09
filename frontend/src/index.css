@@ -1,9 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './components/fonts.css';
-
+@import "./components/fonts.css";
 
 body {
-  font-family: 'Recoleta', serif;
+  font-family: "Recoleta", serif;
+}
+
+.background-container {
+  background-image: url("./components/background.png");
+  background-size: cover;
+  background-position: center;
+  height: 75vh;
+  width: 100%;
+  transition: background-image 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .background-container {
+    background-image: url("./components/background_mobile.png");
+    transition: background-image 0.3s ease-in-out;
+  }
 }

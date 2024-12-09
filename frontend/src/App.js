@@ -17,13 +17,17 @@ import monitorToken from "./pages/monitorToken";
 import logo from "./components/logo.png";
 import AdminOrders from "./pages/AdminOrders";
 import jwt_decode, { jwtDecode } from "jwt-decode";
-import background from "./components/background.png";
+import backgroundLarge from "./components/background.png"; // Renamed for clarity
+import backgroundSmall from "./components/background_mobile.png"; // New mobile background
 import { FaBars, FaTimes, FaShoppingCart, FaUser } from "react-icons/fa";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // New state for background image
+  const [backgroundImage, setBackgroundImage] = useState(backgroundLarge);
 
   useEffect(() => {
     monitorToken();
@@ -43,6 +47,37 @@ function App() {
       setIsAuthenticated(false);
       setUserRole(null);
     }
+  }, []);
+
+  // New useEffect for handling window resize with debounce
+  useEffect(() => {
+    let resizeTimer;
+
+    const updateBackground = () => {
+      if (window.innerWidth <= 768) {
+        // Tailwind's md breakpoint is 768px
+        setBackgroundImage(backgroundSmall);
+      } else {
+        setBackgroundImage(backgroundLarge);
+      }
+    };
+
+    // Initial check
+    updateBackground();
+
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        updateBackground();
+      }, 250); // Adjust the delay as needed
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -272,7 +307,7 @@ function App() {
           </header>
 
           {/* Main Content */}
-          <main className="flex-grow bg-background p-6">
+          <main className="flex-grow p-6">
             <Routes>
               <Route
                 path="/"
@@ -280,13 +315,14 @@ function App() {
                   <section className="flex items-center justify-center">
                     <div
                       style={{
-                        backgroundImage: `url(${background})`,
+                        backgroundImage: `url(${backgroundImage})`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
-                        height: "76vh",
+                        height: "80vh",
                         width: "100%",
+                        transition: "background-image 0.3s ease-in-out",
                       }}
-                      className="bg-cover md:bg-contain bg-center h-[76vh] w-full transition-all duration-300"
+                      className="bg-cover bg-center h-[76vh] w-full transition-all duration-300"
                     ></div>
                   </section>
                 }
@@ -412,4 +448,5 @@ function App() {
     </CartProvider>
   );
 }
+
 export default App;
